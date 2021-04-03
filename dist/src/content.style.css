@@ -1,7 +1,0 @@
-img {
-    filter: blur(75px) !important;
-}
-
-img[data-frep-unblur='true'] {
-    filter: blur(0px) !important;
-}

@@ -9,7 +9,7 @@
 # production
 /build
 
-dist/src
+/dist/src/
 
 # misc
 .DS_Store
