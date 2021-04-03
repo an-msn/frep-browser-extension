@@ -1,210 +1,65 @@
-var webpack = require('webpack'),
-    path = require('path'),
-    fileSystem = require('fs-extra'),
-    env = require('./utils/env'),
-    { CleanWebpackPlugin } = require('clean-webpack-plugin'),
-    CopyWebpackPlugin = require('copy-webpack-plugin'),
-    HtmlWebpackPlugin = require('html-webpack-plugin'),
-    TerserPlugin = require('terser-webpack-plugin');
+const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
+const env = require('./utils/env');
 
-const ASSET_PATH = process.env.ASSET_PATH || '/';
-
-var alias = {
-    'react-dom': '@hot-loader/react-dom',
-    src: path.resolve(__dirname, 'src'),
+const PATHS = {
+    src: path.join(__dirname, 'src'),
+    dist: path.join(__dirname, 'dist/src'),
 };
+console.log(env.NODE_ENV);
 
-// load the secrets
-var secretsPath = path.join(__dirname, 'secrets.' + env.NODE_ENV + '.js');
-
-var fileExtensions = [
-    'jpg',
-    'jpeg',
-    'png',
-    'gif',
-    'eot',
-    'otf',
-    'svg',
-    'ttf',
-    'woff',
-    'woff2',
-];
-
-if (fileSystem.existsSync(secretsPath)) {
-    alias['secrets'] = secretsPath;
-}
-
-var options = {
-    mode: process.env.NODE_ENV || 'development',
-    entry: {
-        popup: path.join(__dirname, 'src', 'parts', 'popup', 'index.jsx'),
-        background: path.join(
-            __dirname,
-            'src',
-            'parts',
-            'background',
-            'index.ts'
-        ),
-        contentScript: path.join(
-            __dirname,
-            'src',
-            'parts',
-            'content',
-            'index.ts'
-        ),
+module.exports = {
+    mode: env.NODE_ENV,
+    watch: env.NODE_ENV === 'development',
+    watchOptions: {
+        ignored: ['node_modules/**'],
     },
-    chromeExtensionBoilerplate: {
-        notHotReload: ['contentScript'],
+    entry: {
+        content: `${PATHS.src}/content/index.ts`,
+        background: `${PATHS.src}/background/index.ts`,
+        popup: `${PATHS.src}/popup/index.tsx`,
     },
     output: {
-        path: path.resolve(__dirname, 'build'),
-        filename: '[name].bundle.js',
-        publicPath: ASSET_PATH,
+        path: PATHS.dist,
+        filename: '[name].js',
     },
     module: {
         rules: [
             {
-                // look for .css or .scss files
-                test: /\.(css|scss)$/,
-                // in the `src` directory
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
+            },
+            {
+                test: /\.(eot|png|svg|[ot]tf|woff2?)(\?v=\d+\.\d+\.\d+)?$/,
+                use: 'file-loader',
+            },
+            {
+                test: /\.css$/,
                 use: [
-                    {
-                        loader: 'style-loader',
-                    },
-                    {
-                        loader: 'css-loader',
-                    },
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            sourceMap: true,
-                        },
-                    },
+                    'style-loader',
+                    // MiniCssExtractPlugin.loader,
+                    'css-loader',
                 ],
-            },
-            {
-                test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
-                loader: 'file-loader',
-                options: {
-                    name: '[name].[ext]',
-                },
-                exclude: /node_modules/,
-            },
-            {
-                test: /\.html$/,
-                loader: 'html-loader',
-                exclude: /node_modules/,
-            },
-            {
-                test: /\.(ts|tsx)$/,
-                loader: 'ts-loader',
-                exclude: /node_modules/,
-            },
-            {
-                test: /\.(js|jsx)$/,
-                use: [
-                    {
-                        loader: 'source-map-loader',
-                    },
-                    {
-                        loader: 'babel-loader',
-                    },
-                ],
-                exclude: /node_modules/,
             },
         ],
-    },
-    resolve: {
-        alias: alias,
-        extensions: fileExtensions
-            .map((extension) => '.' + extension)
-            .concat(['.js', '.jsx', '.ts', '.tsx', '.css']),
     },
     plugins: [
-        new webpack.ProgressPlugin(),
-        // clean the build folder
-        new CleanWebpackPlugin({
-            verbose: true,
-            cleanStaleWebpackAssets: true,
-        }),
-        // expose and write the allowed env vars on the compiled bundle
-        new webpack.EnvironmentPlugin(['NODE_ENV']),
-        new CopyWebpackPlugin({
+        new CopyPlugin({
             patterns: [
-                {
-                    from: 'src/manifest.json',
-                    to: path.join(__dirname, 'build'),
-                    force: true,
-                    transform: function (content, path) {
-                        // generates the manifest file using the package.json informations
-                        return Buffer.from(
-                            JSON.stringify({
-                                description:
-                                    process.env.npm_package_description,
-                                version: process.env.npm_package_version,
-                                ...JSON.parse(content.toString()),
-                            })
-                        );
-                    },
-                },
+                { from: `${PATHS.src}/popup/popup.html`, to: PATHS.dist },
             ],
         }),
-        new CopyWebpackPlugin({
+        new CopyPlugin({
             patterns: [
                 {
-                    from: 'src/parts/content/content.styles.css',
-                    to: path.join(__dirname, 'build'),
-                    force: true,
+                    from: `${PATHS.src}/content/content.style.css`,
+                    to: PATHS.dist,
                 },
             ],
-        }),
-        new CopyWebpackPlugin({
-            patterns: [
-                {
-                    from: 'src/assets/img/icon-128.png',
-                    to: path.join(__dirname, 'build'),
-                    force: true,
-                },
-            ],
-        }),
-        new CopyWebpackPlugin({
-            patterns: [
-                {
-                    from: 'src/assets/img/icon-34.png',
-                    to: path.join(__dirname, 'build'),
-                    force: true,
-                },
-            ],
-        }),
-        new HtmlWebpackPlugin({
-            template: path.join(
-                __dirname,
-                'src',
-                'parts',
-                'popup',
-                'index.html'
-            ),
-            filename: 'popup.html',
-            chunks: ['popup'],
-            cache: false,
         }),
     ],
-    infrastructureLogging: {
-        level: 'info',
+    resolve: {
+        extensions: ['.js', '.ts', '.tsx'],
     },
 };
-
-if (env.NODE_ENV === 'development') {
-    options.devtool = 'cheap-module-source-map';
-} else {
-    options.optimization = {
-        minimize: true,
-        minimizer: [
-            new TerserPlugin({
-                extractComments: false,
-            }),
-        ],
-    };
-}
-
-module.exports = options;
