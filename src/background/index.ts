@@ -1,5 +1,5 @@
 import * as nsfwjs from 'nsfwjs';
-nsfwjs.load('./assets/model/');
+nsfwjs.load('./assets/model/').then((modal) => {});
 
 chrome.contextMenus.remove('unblur-image', () => {
     chrome.contextMenus.create({

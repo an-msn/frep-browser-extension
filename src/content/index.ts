@@ -3,14 +3,10 @@ window.addEventListener('DOMContentLoaded', async (event) => {
 
     const images = document.querySelectorAll('img');
     images.forEach((img) => {
-        // model
-        //     .classify(img)
-        //     .then((res: any) => {
-        //         console.log(res);
-        //     })
-        //     .catch((err: any) => {
-        //         console.log('Error', err);
-        //     });
+        chrome.runtime.sendMessage({
+            action: 'process-image',
+            url: img.getAttribute('src'),
+        });
     });
 });
 
