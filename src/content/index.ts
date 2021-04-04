@@ -1,3 +1,7 @@
+chrome.runtime.sendMessage({
+    action: 'ready-for-background-connection',
+});
+
 chrome.runtime.onConnect.addListener((port) => {
     console.log('Window ready');
     if (port.name !== 'background-to-content-image-filtering') return;

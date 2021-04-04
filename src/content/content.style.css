@@ -10,6 +10,10 @@ img[data-frep-blurvalue='tiny'] {
     filter: blur(0.2em);
 }
 
+img[data-frep-blurvalue='extra-light'] {
+    filter: blur(0.1em);
+}
+
 img[data-frep-blurvalue='unblur'] {
     filter: blur(0px) !important;
 }

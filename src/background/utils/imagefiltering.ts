@@ -28,14 +28,24 @@ export default class ImageFiltering {
                     if (!this.stores[tabId]) {
                         this.createStore(tabId, model);
                     }
-                    if (changeInfo.status === 'complete') {
-                        this.attachPortMessenger(this.stores[tabId]);
-                    }
                 });
 
                 chrome.tabs.onActivated.addListener((info) => {
                     if (!this.stores[info.tabId]) {
                         this.createStore(info.tabId, model);
+                    }
+                });
+
+                chrome.runtime.onMessage.addListener((msg, sender) => {
+                    if (
+                        msg.action === 'ready-for-background-connection' &&
+                        sender.tab?.id
+                    ) {
+                        const tabId = sender.tab?.id as number;
+                        if (!this.stores[tabId]) {
+                            this.createStore(tabId, model);
+                        }
+                        this.attachPortMessenger(this.stores[tabId]);
                     }
                 });
             });

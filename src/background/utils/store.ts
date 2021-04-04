@@ -1,12 +1,13 @@
 import { NSFWJS, predictionType } from 'nsfwjs';
 
-type Item = {
+type ResultData = {
     url: string;
-} & predictionType;
+    result: predictionType[];
+};
 
 export default class Store {
     private pendingItems: { url: string }[];
-    private doneItems: Item[];
+    private doneItems: ResultData[];
     private isProcessing: boolean;
     private model: NSFWJS;
     private messengerPort: chrome.runtime.Port | null;
@@ -51,7 +52,7 @@ export default class Store {
         this.messengerPort = port;
 
         this.messengerPort.onMessage.addListener((data) => {
-            if (data.action === 'process-image' && data.url.length > 0) {
+            if (data.action === 'process-image' && data.url) {
                 this.addToQueue(data.url);
             }
         });
@@ -64,15 +65,9 @@ export default class Store {
             this.loadImage(url).then((res) => {
                 if (res) {
                     this.model.classify(res).then((clRes) => {
-                        const max = clRes.reduce((prev, current) =>
-                            prev.probability > current.probability
-                                ? prev
-                                : current
-                        );
-
                         this.processResult({
                             url,
-                            ...max,
+                            result: clRes,
                         });
 
                         this.isProcessing = false;
@@ -84,21 +79,40 @@ export default class Store {
         }
     }
 
-    private processResult(result: Item) {
+    private processResult(result: ResultData) {
         this.pendingItems.shift();
         this.doneItems.push(result);
 
+        const sorted = result.result.sort((a, b) =>
+            a.probability < b.probability
+                ? 1
+                : b.probability < a.probability
+                ? -1
+                : 0
+        );
+
+        const max = sorted[0];
+
         const blurLevel = (() => {
-            if (!['Drawing', 'Neutral'].includes(result.className)) {
-                if (result.probability <= 0.5) {
-                    if (result.probability >= 0.4) {
+            if (!['Drawing', 'Neutral'].includes(max.className)) {
+                if (max.probability <= 0.5) {
+                    if (max.probability >= 0.4) {
                         return 'medium';
                     }
                     return 'tiny';
                 }
                 return 'max';
             }
-            if (result.probability <= 0.45) {
+            if (max.probability <= 0.6) {
+                if (sorted[1].className === 'Porn') {
+                    return 'medium';
+                }
+                if (
+                    sorted[1].className === 'Drawing' ||
+                    sorted[1].className === 'Neutral'
+                ) {
+                    return 'extra-light';
+                }
                 return 'tiny';
             }
             return 'unblur';
