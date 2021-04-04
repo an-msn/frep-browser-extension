@@ -22,13 +22,28 @@ export default class Store {
     }
 
     addToQueue(url: string) {
-        this.pendingItems.push({
-            url,
-        });
+        const foundInDoneItems = this.doneItems.find(
+            (item) => item.url === url
+        );
+        const shouldAddToQueue = (() => {
+            return !(
+                this.pendingItems.find((item) => item.url === url) ||
+                foundInDoneItems
+            );
+        })();
 
-        if (!this.isProcessing) {
-            this.isProcessing = true;
-            this.process();
+        if (shouldAddToQueue) {
+            this.pendingItems.push({
+                url,
+            });
+
+            if (!this.isProcessing) {
+                this.process();
+            }
+        } else {
+            if (foundInDoneItems) {
+                this.processResult(foundInDoneItems);
+            }
         }
     }
 
@@ -43,7 +58,8 @@ export default class Store {
     }
 
     private process() {
-        if (this.pendingItems.length > 0) {
+        if (this.pendingItems.length > 0 && !this.isProcessing) {
+            this.isProcessing = true;
             const url = this.pendingItems[0].url;
             this.loadImage(url).then((res) => {
                 if (res) {
@@ -59,12 +75,12 @@ export default class Store {
                             ...max,
                         });
 
+                        this.isProcessing = false;
+
                         this.process();
                     });
                 }
             });
-        } else {
-            this.isProcessing = false;
         }
     }
 
@@ -72,9 +88,26 @@ export default class Store {
         this.pendingItems.shift();
         this.doneItems.push(result);
 
+        const blurLevel = (() => {
+            if (!['Drawing', 'Neutral'].includes(result.className)) {
+                if (result.probability <= 0.5) {
+                    if (result.probability >= 0.4) {
+                        return 'medium';
+                    }
+                    return 'tiny';
+                }
+                return 'max';
+            }
+            if (result.probability <= 0.45) {
+                return 'tiny';
+            }
+            return 'unblur';
+        })();
+
         if (this.messengerPort) {
             this.messengerPort.postMessage({
                 action: 'process-result',
+                blurLevel: blurLevel,
                 ...result,
             });
         }

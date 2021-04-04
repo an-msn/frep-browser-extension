@@ -1,7 +1,15 @@
 img {
-    filter: blur(75px) !important;
+    filter: blur(2em) !important;
 }
 
-img[data-frep-unblur='true'] {
+img[data-frep-blurvalue='medium'] {
+    filter: blur(0.8em);
+}
+
+img[data-frep-blurvalue='tiny'] {
+    filter: blur(0.2em);
+}
+
+img[data-frep-blurvalue='unblur'] {
     filter: blur(0px) !important;
 }

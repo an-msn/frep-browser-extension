@@ -4,13 +4,13 @@ chrome.runtime.onConnect.addListener((port) => {
 
     port.onMessage.addListener((msg) => {
         if (msg.action === 'process-result') {
-            if (['Drawing', 'Neutral'].includes(msg.className)) {
+            if (msg.blurLevel !== 'max') {
                 const images = document.querySelectorAll(
                     `img[src='${msg.url}']`
                 );
 
                 images.forEach((img) => {
-                    img.setAttribute('data-frep-unblur', 'true');
+                    img.setAttribute('data-frep-blurvalue', msg.blurLevel);
                 });
             }
         }
@@ -28,23 +28,22 @@ chrome.runtime.onConnect.addListener((port) => {
         mutations.forEach((mutation) => {
             if (mutation.type === 'childList') {
                 mutation.addedNodes.forEach((node) => {
-                    if ((node as HTMLElement).tagName === 'img') {
-                        port.postMessage({
-                            action: 'process-image',
-                            url: (node as HTMLElement).getAttribute('src'),
-                        });
-                    } else {
-                        const images = (node as HTMLElement).querySelectorAll(
-                            'img'
-                        );
-                        images.forEach((img) => {
+                    if (node instanceof HTMLElement) {
+                        if (node.tagName === 'img') {
                             port.postMessage({
                                 action: 'process-image',
-                                url: img.getAttribute('src'),
+                                url: node.getAttribute('src'),
                             });
-                        });
+                        } else {
+                            const images = node.querySelectorAll('img');
+                            images.forEach((img) => {
+                                port.postMessage({
+                                    action: 'process-image',
+                                    url: img.getAttribute('src'),
+                                });
+                            });
+                        }
                     }
-                    console.log(node);
                 });
             }
         });
@@ -72,11 +71,11 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
     if (message === 'getContextMenuElement') {
         if (clickedElement) {
             if (clickedElement.tagName === 'img') {
-                clickedElement.setAttribute('data-frep-unblur', 'true');
+                clickedElement.setAttribute('data-frep-blurvalue', 'unblur');
             } else {
                 const parent = clickedElement.parentElement as Element;
                 parent.querySelectorAll('img').forEach((img) => {
-                    img.setAttribute('data-frep-unblur', 'true');
+                    img.setAttribute('data-frep-blurvalue', 'unblur');
                 });
             }
         }

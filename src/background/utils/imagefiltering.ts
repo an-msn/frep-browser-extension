@@ -28,7 +28,6 @@ export default class ImageFiltering {
                     if (!this.stores[tabId]) {
                         this.createStore(tabId, model);
                     }
-                    console.log(changeInfo);
                     if (changeInfo.status === 'complete') {
                         this.attachPortMessenger(this.stores[tabId]);
                     }
@@ -71,7 +70,7 @@ export default class ImageFiltering {
                         frameId: info.frameId,
                     },
                     (data) => {
-                        console.log(data);
+                        //console.log(data);
                     }
                 );
             }
