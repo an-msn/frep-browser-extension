@@ -8,7 +8,7 @@
         "default_popup": "src/popup.html",
         "default_icon": "assets/img/icon-34.png"
     },
-    "permissions": ["tabs", "contextMenus"],
+    "permissions": ["tabs", "contextMenus", "storage"],
     "icons": {
         "128": "assets/img/icon-128.png"
     },

@@ -1,27 +1,60 @@
-window.addEventListener('DOMContentLoaded', async (event) => {
-    //const model = await nsfwjs.load('./assets/model/model.json');
+chrome.runtime.onConnect.addListener((port) => {
+    console.log('Window ready');
+    if (port.name !== 'background-to-content-image-filtering') return;
+
+    port.onMessage.addListener((msg) => {
+        if (msg.action === 'process-result') {
+            if (['Drawing', 'Neutral'].includes(msg.className)) {
+                const images = document.querySelectorAll(
+                    `img[src='${msg.url}']`
+                );
+
+                images.forEach((img) => {
+                    img.setAttribute('data-frep-unblur', 'true');
+                });
+            }
+        }
+    });
 
     const images = document.querySelectorAll('img');
     images.forEach((img) => {
-        chrome.runtime.sendMessage({
+        port.postMessage({
             action: 'process-image',
             url: img.getAttribute('src'),
         });
     });
-});
 
-const domChangeObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-            mutation.addedNodes.forEach((node) => {});
-        }
+    const domChangeObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach((node) => {
+                    if ((node as HTMLElement).tagName === 'img') {
+                        port.postMessage({
+                            action: 'process-image',
+                            url: (node as HTMLElement).getAttribute('src'),
+                        });
+                    } else {
+                        const images = (node as HTMLElement).querySelectorAll(
+                            'img'
+                        );
+                        images.forEach((img) => {
+                            port.postMessage({
+                                action: 'process-image',
+                                url: img.getAttribute('src'),
+                            });
+                        });
+                    }
+                    console.log(node);
+                });
+            }
+        });
     });
-});
 
-domChangeObserver.observe(document.body, {
-    attributes: true,
-    childList: true,
-    subtree: true,
+    domChangeObserver.observe(document.body, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+    });
 });
 
 let clickedElement: null | Element = null;

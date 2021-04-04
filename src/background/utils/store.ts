@@ -5,32 +5,46 @@ type Item = {
 } & predictionType;
 
 export default class Store {
-    pendingItems: Record<string, { url: string }[]>;
-    doneItems: Record<string, Item[]>;
-    isProcessing: boolean;
-    model: NSFWJS;
+    private pendingItems: { url: string }[];
+    private doneItems: Item[];
+    private isProcessing: boolean;
+    private model: NSFWJS;
+    private messengerPort: chrome.runtime.Port | null;
+    tabId: number;
 
-    constructor({ model }: { model: NSFWJS }) {
-        this.pendingItems = {};
-        this.doneItems = {};
+    constructor({ model, tabId }: { model: NSFWJS; tabId: number }) {
+        this.pendingItems = [];
+        this.doneItems = [];
         this.isProcessing = false;
         this.model = model;
+        this.messengerPort = null;
+        this.tabId = tabId;
     }
 
-    addToQueue(url: string, tabId: string) {
-        this.pendingItems[tabId].push({
+    addToQueue(url: string) {
+        this.pendingItems.push({
             url,
         });
 
         if (!this.isProcessing) {
             this.isProcessing = true;
-            this.process(tabId);
+            this.process();
         }
     }
 
-    process(tabId: string) {
-        if (Object.keys(this.pendingItems).length > 0) {
-            const url = this.pendingItems[tabId][0].url;
+    setMessengerPort(port: chrome.runtime.Port) {
+        this.messengerPort = port;
+
+        this.messengerPort.onMessage.addListener((data) => {
+            if (data.action === 'process-image' && data.url.length > 0) {
+                this.addToQueue(data.url);
+            }
+        });
+    }
+
+    private process() {
+        if (this.pendingItems.length > 0) {
+            const url = this.pendingItems[0].url;
             this.loadImage(url).then((res) => {
                 if (res) {
                     this.model.classify(res).then((clRes) => {
@@ -40,12 +54,12 @@ export default class Store {
                                 : current
                         );
 
-                        this.processResult(tabId, {
+                        this.processResult({
                             url,
                             ...max,
                         });
 
-                        this.process(tabId);
+                        this.process();
                     });
                 }
             });
@@ -54,9 +68,16 @@ export default class Store {
         }
     }
 
-    private processResult(tabId: string, result: Item) {
-        this.pendingItems[tabId].shift();
-        this.doneItems[tabId].push(result);
+    private processResult(result: Item) {
+        this.pendingItems.shift();
+        this.doneItems.push(result);
+
+        if (this.messengerPort) {
+            this.messengerPort.postMessage({
+                action: 'process-result',
+                ...result,
+            });
+        }
     }
 
     private async loadImage(url: string): Promise<HTMLImageElement> {
