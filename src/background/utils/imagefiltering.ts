@@ -7,8 +7,38 @@ export default class ImageFiltering {
     constructor() {
         this.initFiltering();
         this.initContextMenu();
+        this.initOptions();
 
         this.stores = {};
+    }
+
+    private initOptions() {
+        const defaultOptions = {
+            enableFiltering: true,
+        };
+
+        chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+            if (msg.action === 'get-image-filtering-options') {
+                chrome.storage.local.get(['imageFilteringOptions'], (res) => {
+                    console.log('okay', res);
+                    if (res) {
+                        const options = {
+                            ...defaultOptions,
+                            ...res,
+                        };
+
+                        sendResponse({
+                            options,
+                        });
+                    } else {
+                        sendResponse({
+                            options: defaultOptions,
+                        });
+                    }
+                });
+                return true;
+            }
+        });
     }
 
     private initFiltering() {
@@ -39,9 +69,10 @@ export default class ImageFiltering {
                 chrome.runtime.onMessage.addListener((msg, sender) => {
                     if (
                         msg.action === 'ready-for-background-connection' &&
-                        sender.tab?.id
+                        sender.tab &&
+                        sender.tab.id
                     ) {
-                        const tabId = sender.tab?.id as number;
+                        const tabId = sender.tab.id as number;
                         if (!this.stores[tabId]) {
                             this.createStore(tabId, model);
                         }
@@ -65,9 +96,30 @@ export default class ImageFiltering {
     private initContextMenu() {
         chrome.contextMenus.removeAll(() => {
             chrome.contextMenus.create({
-                id: 'unblur-image',
-                title: 'Unblur image',
-                contexts: ['page', 'selection', 'image', 'link'],
+                id: 'frep',
+                title: 'Frep',
+                contexts: ['page', 'image', 'link'],
+            });
+
+            chrome.contextMenus.create({
+                id: 'frep-unblur',
+                title: 'Unblur images',
+                parentId: 'frep',
+                contexts: ['page', 'image', 'link'],
+            });
+
+            chrome.contextMenus.create({
+                id: 'frep-mark-safe',
+                title: 'Mark images as safe',
+                parentId: 'frep',
+                contexts: ['page', 'image', 'link'],
+            });
+
+            chrome.contextMenus.create({
+                id: 'frep-mark-unsafe',
+                title: 'Mark images as unsafe',
+                parentId: 'frep',
+                contexts: ['page', 'image', 'link'],
             });
         });
 
@@ -75,7 +127,7 @@ export default class ImageFiltering {
             if (tab && tab.id && info.frameId !== undefined) {
                 chrome.tabs.sendMessage(
                     tab.id,
-                    'getContextMenuElement',
+                    { action: 'context-menu-clicked', type: info.menuItemId },
                     {
                         frameId: info.frameId,
                     },

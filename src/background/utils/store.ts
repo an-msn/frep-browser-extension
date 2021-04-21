@@ -2,11 +2,12 @@ import { NSFWJS, predictionType } from 'nsfwjs';
 
 type ResultData = {
     url: string;
+    imageId: string;
     result: predictionType[];
 };
 
 export default class Store {
-    private pendingItems: { url: string }[];
+    private pendingItems: { url: string; imageId: string }[];
     private doneItems: ResultData[];
     private isProcessing: boolean;
     private model: NSFWJS;
@@ -22,7 +23,7 @@ export default class Store {
         this.tabId = tabId;
     }
 
-    addToQueue(url: string) {
+    addToQueue(url: string, imageId: string) {
         const foundInDoneItems = this.doneItems.find(
             (item) => item.url === url
         );
@@ -36,6 +37,7 @@ export default class Store {
         if (shouldAddToQueue) {
             this.pendingItems.push({
                 url,
+                imageId,
             });
 
             if (!this.isProcessing) {
@@ -53,7 +55,7 @@ export default class Store {
 
         this.messengerPort.onMessage.addListener((data) => {
             if (data.action === 'process-image' && data.url) {
-                this.addToQueue(data.url);
+                this.addToQueue(data.url, data.imageId);
             }
         });
     }
@@ -61,21 +63,35 @@ export default class Store {
     private process() {
         if (this.pendingItems.length > 0 && !this.isProcessing) {
             this.isProcessing = true;
-            const url = this.pendingItems[0].url;
-            this.loadImage(url).then((res) => {
-                if (res) {
-                    this.model.classify(res).then((clRes) => {
-                        this.processResult({
-                            url,
-                            result: clRes,
-                        });
+            const { url, imageId } = this.pendingItems[0];
+            this.loadImage(url)
+                .then((res) => {
+                    if (res) {
+                        this.model
+                            .classify(res)
+                            .then((clRes) => {
+                                this.processResult({
+                                    url,
+                                    imageId,
+                                    result: clRes,
+                                });
 
-                        this.isProcessing = false;
+                                this.isProcessing = false;
 
-                        this.process();
-                    });
-                }
-            });
+                                this.process();
+                            })
+                            .catch((err) => {
+                                this.isProcessing = false;
+                                this.process();
+                                console.log('Error', err);
+                            });
+                    }
+                })
+                .catch((err) => {
+                    this.isProcessing = false;
+                    this.process();
+                    console.log('Error', err);
+                });
         }
     }
 

@@ -3,14 +3,23 @@ chrome.runtime.sendMessage({
 });
 
 chrome.runtime.onConnect.addListener((port) => {
-    console.log('Window ready');
     if (port.name !== 'background-to-content-image-filtering') return;
+
+    chrome.runtime.sendMessage(
+        { action: 'get-image-filtering-options' },
+        (msg) => {
+            console.log(msg);
+            if (msg.options.enableFiltering) {
+                prepImages(port);
+            }
+        }
+    );
 
     port.onMessage.addListener((msg) => {
         if (msg.action === 'process-result') {
             if (msg.blurLevel !== 'max') {
                 const images = document.querySelectorAll(
-                    `img[src='${msg.url}']`
+                    `img[data-frep-imageid=${msg.imageId}]`
                 );
 
                 images.forEach((img) => {
@@ -19,13 +28,20 @@ chrome.runtime.onConnect.addListener((port) => {
             }
         }
     });
+});
+
+function prepImages(port: chrome.runtime.Port) {
+    let imageId = 0;
 
     const images = document.querySelectorAll('img');
     images.forEach((img) => {
+        img.setAttribute('data-frep-imageid', `${imageId}`);
         port.postMessage({
             action: 'process-image',
             url: img.getAttribute('src'),
+            imageId: imageId,
         });
+        imageId++;
     });
 
     const domChangeObserver = new MutationObserver((mutations) => {
@@ -37,18 +53,48 @@ chrome.runtime.onConnect.addListener((port) => {
                             port.postMessage({
                                 action: 'process-image',
                                 url: node.getAttribute('src'),
+                                imageId: imageId,
                             });
+                            node.setAttribute(
+                                'data-frep-imageid',
+                                `${imageId}`
+                            );
+                            imageId++;
                         } else {
                             const images = node.querySelectorAll('img');
                             images.forEach((img) => {
                                 port.postMessage({
                                     action: 'process-image',
                                     url: img.getAttribute('src'),
+                                    imageId: imageId,
                                 });
+                                img.setAttribute(
+                                    'data-frep-imageid',
+                                    `${imageId}`
+                                );
+                                imageId++;
                             });
                         }
                     }
                 });
+            } else {
+                if (mutation.type === 'attributes') {
+                    if (
+                        mutation.attributeName === 'src' &&
+                        mutation.target instanceof HTMLElement
+                    ) {
+                        mutation.target.setAttribute(
+                            'data-frep-imageid',
+                            `${imageId}`
+                        );
+                        port.postMessage({
+                            action: 'process-image',
+                            url: mutation.target.getAttribute('src'),
+                            imageId: imageId,
+                        });
+                        imageId++;
+                    }
+                }
             }
         });
     });
@@ -58,7 +104,7 @@ chrome.runtime.onConnect.addListener((port) => {
         childList: true,
         subtree: true,
     });
-});
+}
 
 let clickedElement: null | Element = null;
 
@@ -71,18 +117,21 @@ document.addEventListener(
 );
 
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
-    console.log(clickedElement);
-    if (message === 'getContextMenuElement') {
+    if (message.action === 'context-menu-clicked') {
         if (clickedElement) {
-            if (clickedElement.tagName === 'img') {
-                clickedElement.setAttribute('data-frep-blurvalue', 'unblur');
-            } else {
-                const parent = clickedElement.parentElement as Element;
-                parent.querySelectorAll('img').forEach((img) => {
-                    img.setAttribute('data-frep-blurvalue', 'unblur');
-                });
+            if (message.type === 'frep-unblur') {
+                if (clickedElement.tagName === 'img') {
+                    clickedElement.setAttribute(
+                        'data-frep-blurvalue',
+                        'unblur'
+                    );
+                } else {
+                    const parent = clickedElement.parentElement as Element;
+                    parent.querySelectorAll('img').forEach((img) => {
+                        img.setAttribute('data-frep-blurvalue', 'unblur');
+                    });
+                }
             }
         }
-        sendResponse({ value: 1 });
     }
 });

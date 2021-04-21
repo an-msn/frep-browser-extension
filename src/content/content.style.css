@@ -3,15 +3,15 @@ img {
 }
 
 img[data-frep-blurvalue='medium'] {
-    filter: blur(0.8em);
+    filter: blur(0.8em) !important;
 }
 
 img[data-frep-blurvalue='tiny'] {
-    filter: blur(0.2em);
+    filter: blur(0.2em) !important;
 }
 
 img[data-frep-blurvalue='extra-light'] {
-    filter: blur(0.1em);
+    filter: blur(0.1em) !important;
 }
 
 img[data-frep-blurvalue='unblur'] {
