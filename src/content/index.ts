@@ -147,6 +147,59 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
                         img.setAttribute('data-frep-blurvalue', 'unblur');
                     });
                 }
+            } else if (message.type === 'frep-mark-unsafe') {
+                if (clickedElement.tagName === 'img') {
+                    clickedElement.setAttribute('data-frep-blurvalue', 'max');
+                    sendResponse({
+                        type: 'marked-unsafe',
+                        data: [
+                            {
+                                src: clickedElement.getAttribute('src'),
+                            },
+                        ],
+                    });
+                } else {
+                    const parent = clickedElement.parentElement as Element;
+                    const data: { src: string }[] = [];
+                    parent.querySelectorAll('img').forEach((img) => {
+                        img.setAttribute('data-frep-blurvalue', 'max');
+                        data.push({
+                            src: img.getAttribute('src') as string,
+                        });
+                    });
+                    sendResponse({
+                        type: 'marked-unsafe',
+                        data,
+                    });
+                }
+            } else if (message.type === 'frep-mark-safe') {
+                if (clickedElement.tagName === 'img') {
+                    clickedElement.setAttribute(
+                        'data-frep-blurvalue',
+                        'unblur'
+                    );
+                    sendResponse({
+                        type: 'marked-safe',
+                        data: [
+                            {
+                                src: clickedElement.getAttribute('src'),
+                            },
+                        ],
+                    });
+                } else {
+                    const parent = clickedElement.parentElement as Element;
+                    const data: { src: string }[] = [];
+                    parent.querySelectorAll('img').forEach((img) => {
+                        img.setAttribute('data-frep-blurvalue', 'unblur');
+                        data.push({
+                            src: img.getAttribute('src') as string,
+                        });
+                    });
+                    sendResponse({
+                        type: 'marked-safe',
+                        data,
+                    });
+                }
             }
         }
     }

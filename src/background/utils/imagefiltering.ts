@@ -182,7 +182,35 @@ export default class ImageFiltering {
                         frameId: info.frameId,
                     },
                     (data) => {
-                        //console.log(data);
+                        if (data.type === 'marked-unsafe') {
+                            const images = data.data as { src: string }[];
+
+                            images.forEach((image) => {
+                                this.localDB.putImage({
+                                    url: image.src,
+                                    result: [
+                                        {
+                                            className: 'Porn',
+                                            probability: 1,
+                                        },
+                                    ],
+                                });
+                            });
+                        } else if (data.type === 'marked-safe') {
+                            const images = data.data as { src: string }[];
+
+                            images.forEach((image) => {
+                                this.localDB.putImage({
+                                    url: image.src,
+                                    result: [
+                                        {
+                                            className: 'Neutral',
+                                            probability: 1,
+                                        },
+                                    ],
+                                });
+                            });
+                        }
                     }
                 );
             }

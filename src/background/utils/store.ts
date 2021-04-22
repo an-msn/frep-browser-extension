@@ -167,7 +167,7 @@ export default class Store {
     }
 
     private async addToLocal(data: ImageItem) {
-        return this.localDB.addImage(data);
+        return this.localDB.putImage(data);
     }
 
     public flushQueue() {

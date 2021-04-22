@@ -39,8 +39,8 @@ export default class LocalDB {
         };
     }
 
-    public async addImage({ url, result }: ImageItem) {
-        const addReq = () => {
+    public async putImage({ url, result }: ImageItem) {
+        const putReq = () => {
             const transcation = this.dbRequest.result.transaction(
                 'image_results',
                 'readwrite'
@@ -48,14 +48,14 @@ export default class LocalDB {
             const store = transcation.objectStore('image_results');
 
             return new Promise((resolve, reject) => {
-                const add = store.add({
+                const put = store.put({
                     url,
                     result,
                 });
-                add.onsuccess = () => {
+                put.onsuccess = () => {
                     resolve(true);
                 };
-                add.onerror = (err) => {
+                put.onerror = (err) => {
                     reject(err);
                 };
             });
@@ -63,12 +63,12 @@ export default class LocalDB {
 
         if (this.dbRequest.readyState === 'done') {
             if (this.dbRequest.result) {
-                addReq();
+                putReq();
             }
         } else {
             return new Promise((resolve, reject) => {
                 this.dbRequest.addEventListener('success', () => {
-                    addReq();
+                    putReq();
                 });
             });
         }
