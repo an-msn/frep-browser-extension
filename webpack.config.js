@@ -62,4 +62,5 @@ module.exports = {
     resolve: {
         extensions: ['.js', '.ts', '.tsx'],
     },
+    devtool: 'inline-cheap-source-map',
 };

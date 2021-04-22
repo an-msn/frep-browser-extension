@@ -20,7 +20,6 @@ export default class ImageFiltering {
         chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             if (msg.action === 'get-image-filtering-options') {
                 chrome.storage.local.get(['imageFilteringOptions'], (res) => {
-                    console.log('okay', res);
                     if (res) {
                         const options = {
                             ...defaultOptions,
@@ -48,35 +47,54 @@ export default class ImageFiltering {
                 type: 'graph',
             })
             .then((model) => {
-                chrome.tabs.onCreated.addListener((tab) => {
-                    if (tab.id) {
-                        this.createStore(tab.id, model);
-                    }
-                });
-
                 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
                     if (!this.stores[tabId]) {
-                        this.createStore(tabId, model);
+                        if (
+                            changeInfo.title ||
+                            changeInfo.url ||
+                            changeInfo.favIconUrl
+                        ) {
+                            console.log('Flushing store');
+                            this.flushStore(tabId);
+                        }
                     }
                 });
 
                 chrome.tabs.onActivated.addListener((info) => {
+                    this.pauseAllStores();
                     if (!this.stores[info.tabId]) {
-                        this.createStore(info.tabId, model);
+                        this.resumeStore(info.tabId);
                     }
                 });
 
+                console.log('Ready');
                 chrome.runtime.onMessage.addListener((msg, sender) => {
+                    console.log('Message reached', msg, sender.tab);
                     if (
                         msg.action === 'ready-for-background-connection' &&
                         sender.tab &&
-                        sender.tab.id
+                        sender.tab.id &&
+                        sender.tab.id > 0
                     ) {
                         const tabId = sender.tab.id as number;
                         if (!this.stores[tabId]) {
+                            console.log('Creating store');
                             this.createStore(tabId, model);
+                        } else {
+                            console.log('Attaching messenger');
+                            this.attachPortMessenger(this.stores[tabId]);
                         }
-                        this.attachPortMessenger(this.stores[tabId]);
+                    }
+                });
+
+                chrome.tabs.onRemoved.addListener((tabId) => {
+                    this.removeStore(tabId);
+                });
+
+                chrome.tabs.onReplaced.addListener((newTab, oldTab) => {
+                    if (this.stores[oldTab]) {
+                        this.stores[newTab] = this.stores[oldTab];
+                        this.removeStore(oldTab);
                     }
                 });
             });
@@ -84,13 +102,42 @@ export default class ImageFiltering {
 
     private createStore(tabId: number, model: nsfwjs.NSFWJS) {
         this.stores[tabId] = new Store({ tabId, model });
+        this.attachPortMessenger(this.stores[tabId]);
+    }
+
+    private pauseAllStores() {
+        for (const store in this.stores) {
+            this.stores[store].pause();
+        }
+    }
+
+    private resumeStore(tabId: number) {
+        if (this.stores[tabId]) {
+            this.stores[tabId].resume();
+        }
+    }
+
+    private flushStore(tabId: number) {
+        if (this.stores[tabId]) this.stores[tabId].flushQueue();
     }
 
     private attachPortMessenger(store: Store) {
+        if (store.portActive) {
+            return;
+        }
         const messengerPort = chrome.tabs.connect(store.tabId, {
             name: 'background-to-content-image-filtering',
         });
         store.setMessengerPort(messengerPort);
+    }
+
+    private removeStore(tabId: number) {
+        if (this.stores[tabId]) {
+            if (this.stores[tabId].messengerPort) {
+                this.stores[tabId].messengerPort?.disconnect();
+            }
+            delete this.stores[tabId];
+        }
     }
 
     private initContextMenu() {

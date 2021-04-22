@@ -1,9 +1,16 @@
-chrome.runtime.sendMessage({
-    action: 'ready-for-background-connection',
-});
+let messageSent = false;
+
+if (!messageSent) {
+    console.log('Sending message');
+    chrome.runtime.sendMessage({
+        action: 'ready-for-background-connection',
+    });
+    messageSent = true;
+}
 
 chrome.runtime.onConnect.addListener((port) => {
     if (port.name !== 'background-to-content-image-filtering') return;
+    console.log('connected');
 
     chrome.runtime.sendMessage(
         { action: 'get-image-filtering-options' },
@@ -18,12 +25,14 @@ chrome.runtime.onConnect.addListener((port) => {
     port.onMessage.addListener((msg) => {
         if (msg.action === 'process-result') {
             if (msg.blurLevel !== 'max') {
-                const images = document.querySelectorAll(
-                    `img[data-frep-imageid=${msg.imageId}]`
-                );
+                msg.imageId.forEach((imgId: string) => {
+                    const images = document.querySelectorAll(
+                        `img[data-frep-imageid='${imgId}']`
+                    );
 
-                images.forEach((img) => {
-                    img.setAttribute('data-frep-blurvalue', msg.blurLevel);
+                    images.forEach((img) => {
+                        img.setAttribute('data-frep-blurvalue', msg.blurLevel);
+                    });
                 });
             }
         }
@@ -35,10 +44,17 @@ function prepImages(port: chrome.runtime.Port) {
 
     const images = document.querySelectorAll('img');
     images.forEach((img) => {
+        const src = (() => {
+            const imgSrc = img.getAttribute('src');
+            if (imgSrc?.startsWith('/')) {
+                return `${window.location.origin}${imgSrc}`;
+            }
+            return imgSrc;
+        })();
         img.setAttribute('data-frep-imageid', `${imageId}`);
         port.postMessage({
             action: 'process-image',
-            url: img.getAttribute('src'),
+            url: src,
             imageId: imageId,
         });
         imageId++;

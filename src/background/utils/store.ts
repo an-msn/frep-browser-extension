@@ -2,16 +2,24 @@ import { NSFWJS, predictionType } from 'nsfwjs';
 
 type ResultData = {
     url: string;
-    imageId: string;
+    imageId: string[];
     result: predictionType[];
 };
 
+interface Process {
+    url: string;
+    imageId: string[];
+    tryCount: number;
+}
+
 export default class Store {
-    private pendingItems: { url: string; imageId: string }[];
+    private pendingItems: Process[];
     private doneItems: ResultData[];
     private isProcessing: boolean;
     private model: NSFWJS;
-    private messengerPort: chrome.runtime.Port | null;
+    public messengerPort: chrome.runtime.Port | null;
+    public portActive: boolean;
+    private paused: boolean;
     tabId: number;
 
     constructor({ model, tabId }: { model: NSFWJS; tabId: number }) {
@@ -21,49 +29,62 @@ export default class Store {
         this.model = model;
         this.messengerPort = null;
         this.tabId = tabId;
+        this.paused = false;
+        this.portActive = false;
     }
 
     addToQueue(url: string, imageId: string) {
         const foundInDoneItems = this.doneItems.find(
             (item) => item.url === url
         );
-        const shouldAddToQueue = (() => {
-            return !(
-                this.pendingItems.find((item) => item.url === url) ||
-                foundInDoneItems
-            );
-        })();
+        const isInPending = this.pendingItems.find((item) => item.url === url);
 
-        if (shouldAddToQueue) {
-            this.pendingItems.push({
-                url,
-                imageId,
-            });
+        if (!foundInDoneItems) {
+            if (isInPending) {
+                isInPending.imageId.push(imageId);
+            } else {
+                this.pendingItems.push({
+                    url,
+                    imageId: [imageId],
+                    tryCount: 0,
+                });
+            }
 
-            if (!this.isProcessing) {
+            if (!this.isProcessing && !this.paused) {
                 this.process();
             }
         } else {
             if (foundInDoneItems) {
-                this.processResult(foundInDoneItems);
+                this.processResult({ ...foundInDoneItems, imageId: [imageId] });
             }
         }
     }
 
     setMessengerPort(port: chrome.runtime.Port) {
         this.messengerPort = port;
+        this.portActive = true;
 
         this.messengerPort.onMessage.addListener((data) => {
             if (data.action === 'process-image' && data.url) {
                 this.addToQueue(data.url, data.imageId);
             }
         });
+
+        this.messengerPort.onDisconnect.addListener(() => {
+            this.portActive = false;
+            this.messengerPort = null;
+        });
     }
 
     private process() {
-        if (this.pendingItems.length > 0 && !this.isProcessing) {
+        if (
+            this.pendingItems.length > 0 &&
+            !this.isProcessing &&
+            !this.paused
+        ) {
             this.isProcessing = true;
-            const { url, imageId } = this.pendingItems[0];
+            const currentProcessing = this.pendingItems[0];
+            const { url, imageId } = currentProcessing;
             this.loadImage(url)
                 .then((res) => {
                     if (res) {
@@ -82,6 +103,7 @@ export default class Store {
                             })
                             .catch((err) => {
                                 this.isProcessing = false;
+                                this.retryProcess(currentProcessing);
                                 this.process();
                                 console.log('Error', err);
                             });
@@ -89,9 +111,41 @@ export default class Store {
                 })
                 .catch((err) => {
                     this.isProcessing = false;
+                    this.retryProcess(currentProcessing);
                     this.process();
-                    console.log('Error', err);
+                    console.log('Error creating image', err);
                 });
+        }
+    }
+
+    public flushQueue() {
+        this.pendingItems = [];
+        this.isProcessing = false;
+    }
+
+    public pause() {
+        this.paused = true;
+    }
+
+    public resume() {
+        this.paused = false;
+    }
+
+    private retryProcess(process: Process) {
+        if (process.tryCount > 2) {
+            this.pendingItems.shift();
+            this.doneItems.push({
+                imageId: process.imageId,
+                url: process.url,
+                result: [
+                    {
+                        className: 'Porn',
+                        probability: 0.45,
+                    },
+                ],
+            });
+        } else {
+            process.tryCount++;
         }
     }
 
