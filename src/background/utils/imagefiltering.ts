@@ -1,10 +1,13 @@
 import * as nsfwjs from 'nsfwjs';
+import LocalDB from './localdb';
 import Store from './store';
 
 export default class ImageFiltering {
     private stores: Record<number, Store>;
-
+    private localDB: LocalDB;
     constructor() {
+        this.localDB = new LocalDB();
+
         this.initFiltering();
         this.initContextMenu();
         this.initOptions();
@@ -101,7 +104,7 @@ export default class ImageFiltering {
     }
 
     private createStore(tabId: number, model: nsfwjs.NSFWJS) {
-        this.stores[tabId] = new Store({ tabId, model });
+        this.stores[tabId] = new Store({ tabId, model, localDB: this.localDB });
         this.attachPortMessenger(this.stores[tabId]);
     }
 

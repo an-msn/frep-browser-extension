@@ -1,10 +1,13 @@
 import { NSFWJS, predictionType } from 'nsfwjs';
+import LocalDB from './localdb';
 
-type ResultData = {
+type ImageItem = {
     url: string;
-    imageId: string[];
     result: predictionType[];
 };
+type ResultData = {
+    imageId: string[];
+} & ImageItem;
 
 interface Process {
     url: string;
@@ -17,12 +20,21 @@ export default class Store {
     private doneItems: ResultData[];
     private isProcessing: boolean;
     private model: NSFWJS;
-    public messengerPort: chrome.runtime.Port | null;
-    public portActive: boolean;
     private paused: boolean;
+    private localDB: LocalDB;
+    public portActive: boolean;
+    public messengerPort: chrome.runtime.Port | null;
     tabId: number;
 
-    constructor({ model, tabId }: { model: NSFWJS; tabId: number }) {
+    constructor({
+        model,
+        tabId,
+        localDB,
+    }: {
+        model: NSFWJS;
+        tabId: number;
+        localDB: LocalDB;
+    }) {
         this.pendingItems = [];
         this.doneItems = [];
         this.isProcessing = false;
@@ -31,6 +43,7 @@ export default class Store {
         this.tabId = tabId;
         this.paused = false;
         this.portActive = false;
+        this.localDB = localDB;
     }
 
     addToQueue(url: string, imageId: string) {
@@ -85,37 +98,76 @@ export default class Store {
             this.isProcessing = true;
             const currentProcessing = this.pendingItems[0];
             const { url, imageId } = currentProcessing;
-            this.loadImage(url)
+
+            this.checkLocal(url)
                 .then((res) => {
-                    if (res) {
-                        this.model
-                            .classify(res)
-                            .then((clRes) => {
-                                this.processResult({
-                                    url,
-                                    imageId,
-                                    result: clRes,
-                                });
+                    console.log(`${url} found`);
+                    this.processResult({
+                        url,
+                        imageId,
+                        result: res.result,
+                    });
 
-                                this.isProcessing = false;
-
-                                this.process();
-                            })
-                            .catch((err) => {
-                                this.isProcessing = false;
-                                this.retryProcess(currentProcessing);
-                                this.process();
-                                console.log('Error', err);
-                            });
-                    }
-                })
-                .catch((err) => {
                     this.isProcessing = false;
-                    this.retryProcess(currentProcessing);
+
                     this.process();
-                    console.log('Error creating image', err);
+                })
+                .catch(() => {
+                    this.loadImage(url)
+                        .then((res) => {
+                            if (res) {
+                                this.model
+                                    .classify(res)
+                                    .then((clRes) => {
+                                        this.addToLocal({
+                                            url,
+                                            result: clRes,
+                                        });
+                                        this.processResult({
+                                            url,
+                                            imageId,
+                                            result: clRes,
+                                        });
+
+                                        this.isProcessing = false;
+                                        this.process();
+                                    })
+                                    .catch((err) => {
+                                        this.isProcessing = false;
+                                        this.retryProcess(currentProcessing);
+                                        this.process();
+                                        console.log('Error', err);
+                                    });
+                            }
+                        })
+                        .catch((err) => {
+                            this.isProcessing = false;
+                            this.retryProcess(currentProcessing);
+                            this.process();
+                            console.log('Error creating image', err);
+                        });
                 });
         }
+    }
+
+    private async checkLocal(url: string): Promise<ImageItem> {
+        return new Promise((resolve, reject) => {
+            this.localDB
+                .getImage(url)
+                .then((res) => {
+                    if (res) {
+                        resolve(res);
+                    }
+                    reject();
+                })
+                .catch(() => {
+                    reject();
+                });
+        });
+    }
+
+    private async addToLocal(data: ImageItem) {
+        return this.localDB.addImage(data);
     }
 
     public flushQueue() {
