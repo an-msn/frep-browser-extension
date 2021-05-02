@@ -4,7 +4,7 @@
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "name": "Frep",
     "background": { "scripts": ["src/background.js"] },
-    "page_action": {
+    "browser_action": {
         "default_popup": "src/popup.html",
         "default_icon": "assets/img/icon-34.png"
     },

@@ -21,13 +21,15 @@
         "nsfwjs": "^2.3.0",
         "react": "^17.0.1",
         "react-dom": "^17.0.1",
-        "react-hot-loader": "^4.13.0"
+        "react-hot-loader": "^4.13.0",
+        "styled-components": "^5.2.3"
     },
     "devDependencies": {
         "@babel/core": "^7.12.17",
         "@babel/plugin-proposal-class-properties": "^7.12.13",
         "@babel/preset-env": "^7.12.17",
         "@babel/preset-react": "^7.12.13",
+        "@types/styled-components": "^5.1.9",
         "@typescript-eslint/eslint-plugin": "^4.0.0",
         "@typescript-eslint/parser": "^4.0.0",
         "babel-eslint": "^10.0.0",

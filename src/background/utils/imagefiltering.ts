@@ -26,7 +26,7 @@ export default class ImageFiltering {
                     if (res) {
                         const options = {
                             ...defaultOptions,
-                            ...res,
+                            ...res.imageFilteringOptions,
                         };
 
                         sendResponse({
@@ -37,6 +37,23 @@ export default class ImageFiltering {
                             options: defaultOptions,
                         });
                     }
+                });
+                return true;
+            } else if (msg.action === 'update-image-filtering-options') {
+                console.log('Updating options', msg);
+                chrome.storage.local.get(['imageFilteringOptions'], (res) => {
+                    const options = {
+                        ...defaultOptions,
+                        ...res.imageFilteringOptions,
+                        ...msg.options,
+                    };
+
+                    chrome.storage.local.set(
+                        { imageFilteringOptions: options },
+                        () => {
+                            sendResponse(true);
+                        }
+                    );
                 });
                 return true;
             }
@@ -72,7 +89,6 @@ export default class ImageFiltering {
 
                 console.log('Ready');
                 chrome.runtime.onMessage.addListener((msg, sender) => {
-                    console.log('Message reached', msg, sender.tab);
                     if (
                         msg.action === 'ready-for-background-connection' &&
                         sender.tab &&
@@ -81,13 +97,12 @@ export default class ImageFiltering {
                     ) {
                         const tabId = sender.tab.id as number;
                         if (!this.stores[tabId]) {
-                            console.log('Creating store');
                             this.createStore(tabId, model);
                         } else {
-                            console.log('Attaching messenger');
                             this.attachPortMessenger(this.stores[tabId]);
                         }
                     }
+                    return true;
                 });
 
                 chrome.tabs.onRemoved.addListener((tabId) => {
