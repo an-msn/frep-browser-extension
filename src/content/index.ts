@@ -1,7 +1,6 @@
 let messageSent = false;
 
 if (!messageSent) {
-    console.log('Sending message');
     chrome.runtime.sendMessage({
         action: 'ready-for-background-connection',
     });
@@ -10,14 +9,18 @@ if (!messageSent) {
 
 chrome.runtime.onConnect.addListener((port) => {
     if (port.name !== 'background-to-content-image-filtering') return;
-    console.log('connected');
 
     chrome.runtime.sendMessage(
         { action: 'get-image-filtering-options' },
         (msg) => {
-            console.log(msg);
             if (msg.options.enableFiltering) {
                 prepImages(port);
+            } else {
+                document.documentElement.setAttribute(
+                    'data-frep-disabled',
+                    'true'
+                );
+                document.body.setAttribute('data-frep-disabled', 'true');
             }
         }
     );

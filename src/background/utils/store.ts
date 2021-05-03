@@ -101,7 +101,6 @@ export default class Store {
 
             this.checkLocal(url)
                 .then((res) => {
-                    console.log(`${url} found`);
                     this.processResult({
                         url,
                         imageId,

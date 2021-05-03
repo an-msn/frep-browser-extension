@@ -3,6 +3,7 @@ import { TabbedItem, Tabs } from './components/tabs';
 import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
 import ImageFiltering from './routes/imagefiltering';
 import theme from './utils/theme';
+import UserManagement from './routes/user';
 
 const GlobalStyles = createGlobalStyle`
     * {
@@ -13,11 +14,14 @@ const GlobalStyles = createGlobalStyle`
 
     @font-face {
         font-family: Rubik;
-        src: url('/assets/fonts/rubik.ttf');
+        src: url('../assets/fonts/rubik.ttf') format('truetype-variations');
+        font-weight: 1 999;
+        font-style: oblique 0deg 20deg;
     }
 
     body {
         font-family: 'Rubik', sans-serif;
+        font-style: normal;
     }
 `;
 
@@ -39,6 +43,9 @@ const Popup = () => {
                         </TabbedItem>
                         <TabbedItem title="Comments">
                             <h2>Comments</h2>
+                        </TabbedItem>
+                        <TabbedItem title="User">
+                            <UserManagement />
                         </TabbedItem>
                     </Tabs>
                 </Main>

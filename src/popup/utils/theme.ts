@@ -8,6 +8,7 @@ const theme = {
         text: 'hsl(0, 0%, 90%)',
         textLight: 'hsl(0, 0%, 96%)',
         textDark: 'hsl(0, 0%, 84%)',
+        textAlt: 'hsl(240, 27%, 70%)',
         primary: 'hsl(350, 78%, 59%)',
         primaryLight: 'hsl(350, 78%, 63%)',
         primaryDark: 'hsl(350, 78%, 50%)',

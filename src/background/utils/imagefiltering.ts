@@ -5,6 +5,9 @@ import Store from './store';
 export default class ImageFiltering {
     private stores: Record<number, Store>;
     private localDB: LocalDB;
+    private optionsCache: {
+        enableFiltering: boolean;
+    } | null;
     constructor() {
         this.localDB = new LocalDB();
 
@@ -13,6 +16,8 @@ export default class ImageFiltering {
         this.initOptions();
 
         this.stores = {};
+
+        this.optionsCache = null;
     }
 
     private initOptions() {
@@ -20,24 +25,30 @@ export default class ImageFiltering {
             enableFiltering: true,
         };
 
+        chrome.storage.local.get(['imageFilteringOptions'], (res) => {
+            if (res) {
+                const options = {
+                    ...defaultOptions,
+                    ...res.imageFilteringOptions,
+                };
+                console.log('Saved options', res.imageFilteringOptions);
+                this.optionsCache = options;
+            } else {
+                this.optionsCache = defaultOptions;
+            }
+        });
+
         chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             if (msg.action === 'get-image-filtering-options') {
-                chrome.storage.local.get(['imageFilteringOptions'], (res) => {
-                    if (res) {
-                        const options = {
-                            ...defaultOptions,
-                            ...res.imageFilteringOptions,
-                        };
-
-                        sendResponse({
-                            options,
-                        });
-                    } else {
-                        sendResponse({
-                            options: defaultOptions,
-                        });
-                    }
-                });
+                if (this.optionsCache) {
+                    sendResponse({
+                        options: this.optionsCache,
+                    });
+                } else {
+                    sendResponse({
+                        options: defaultOptions,
+                    });
+                }
                 return true;
             } else if (msg.action === 'update-image-filtering-options') {
                 console.log('Updating options', msg);
@@ -51,6 +62,7 @@ export default class ImageFiltering {
                     chrome.storage.local.set(
                         { imageFilteringOptions: options },
                         () => {
+                            this.optionsCache = options;
                             sendResponse(true);
                         }
                     );
@@ -74,7 +86,6 @@ export default class ImageFiltering {
                             changeInfo.url ||
                             changeInfo.favIconUrl
                         ) {
-                            console.log('Flushing store');
                             this.flushStore(tabId);
                         }
                     }
@@ -87,7 +98,6 @@ export default class ImageFiltering {
                     }
                 });
 
-                console.log('Ready');
                 chrome.runtime.onMessage.addListener((msg, sender) => {
                     if (
                         msg.action === 'ready-for-background-connection' &&
