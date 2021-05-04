@@ -1,6 +1,6 @@
 import { Card } from '../../components/ui';
 import React, { useEffect, useState } from 'react';
-import { LogoutIcon, PencilAltIcon } from '@heroicons/react/outline';
+import { LogoutIcon, PencilIcon } from '@heroicons/react/outline';
 import styled from 'styled-components';
 import md5 from 'md5';
 
@@ -110,7 +110,7 @@ export default function UserManagement() {
                     </div>
                     <div className="edit-profile">
                         <p>Edit Profile</p>
-                        <PencilAltIcon className="icon" />
+                        <PencilIcon className="icon" />
                     </div>
                 </UserDataContainer>
             </Card>
