@@ -1,11 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TabbedItem, Tabs } from './components/tabs';
 import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
+import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
+import { ApolloProvider } from '@apollo/client/react';
+import { setContext } from '@apollo/client/link/context';
 import ImageFiltering from './tabs/imagefiltering';
 import theme from './utils/theme';
 import UserManagement from './tabs/user';
 import './utils/firebase';
 import firebase from 'firebase';
+import InitUser from './utils/inituser';
 
 const GlobalStyles = createGlobalStyle`
     * {
@@ -51,34 +55,62 @@ const Main = styled.div`
 `;
 
 const Popup = () => {
+    const httpLink = createHttpLink({
+        uri: 'http://localhost:7000/api',
+    });
+
+    const client = new ApolloClient({
+        cache: new InMemoryCache(),
+        link: httpLink,
+    });
+
+    const [hasUser, setHasUser] = useState(false);
+
     useEffect(() => {
         firebase.auth().onAuthStateChanged((u) => {
             if (u) {
-                console.log(u?.uid);
+                u.getIdToken().then((token) => {
+                    const authLink = setContext((_, { headers }) => {
+                        return {
+                            headers: {
+                                ...headers,
+                                authorization: token ? `Bearer ${token}` : '',
+                            },
+                        };
+                    });
+                    client.setLink(authLink.concat(httpLink));
+                    setHasUser(true);
+                });
             } else {
-                console.log('Not logged in');
+                setHasUser(false);
+                client.setLink(httpLink);
+                client.clearStore();
             }
         });
+        // eslint-disable-next-line
     }, []);
 
     return (
         <div className="App">
-            <ThemeProvider theme={theme.dark}>
-                <GlobalStyles />
-                <Main>
-                    <Tabs>
-                        <TabbedItem title="Image Filtering">
-                            <ImageFiltering />
-                        </TabbedItem>
-                        <TabbedItem title="Comments">
-                            <h2>Comments</h2>
-                        </TabbedItem>
-                        <TabbedItem title="User">
-                            <UserManagement />
-                        </TabbedItem>
-                    </Tabs>
-                </Main>
-            </ThemeProvider>
+            <ApolloProvider client={client}>
+                {hasUser && <InitUser />}
+                <ThemeProvider theme={theme.dark}>
+                    <GlobalStyles />
+                    <Main>
+                        <Tabs>
+                            <TabbedItem title="Image Filtering">
+                                <ImageFiltering />
+                            </TabbedItem>
+                            <TabbedItem title="Comments">
+                                <h2>Comments</h2>
+                            </TabbedItem>
+                            <TabbedItem title="User">
+                                <UserManagement />
+                            </TabbedItem>
+                        </Tabs>
+                    </Main>
+                </ThemeProvider>
+            </ApolloProvider>
         </div>
     );
 };

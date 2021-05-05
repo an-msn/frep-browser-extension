@@ -10,7 +10,10 @@
     "scripts": {
         "start": "webpack",
         "build": "set NODE_ENV=production && webpack",
-        "prettier": "prettier --write \"src/**/*.{js,jsx,css,html,ts,tsx}\""
+        "prettier": "prettier --write \"src/**/*.{js,jsx,css,html,ts,tsx}\"",
+        "apollo-dl": "apollo client:download-schema --endpoint=http://localhost:7000/api ./src/popup/graphql-schema.json",
+        "apollo-gen": "apollo client:codegen ./src/popup/ --localSchemaFile=./src/popup/graphql-schema.json --target=typescript --tagName=gql --outputFlat",
+        "codegen": "yarn apollo-dl && yarn apollo-gen"
     },
     "dependencies": {
         "@apollo/client": "^3.3.16",
@@ -38,11 +41,13 @@
         "@babel/plugin-proposal-class-properties": "^7.12.13",
         "@babel/preset-env": "^7.12.17",
         "@babel/preset-react": "^7.12.13",
+        "@types/graphql": "^14.5.0",
         "@types/md5": "^2.3.0",
         "@types/react-router-dom": "^5.1.7",
         "@types/styled-components": "^5.1.9",
         "@typescript-eslint/eslint-plugin": "^4.0.0",
         "@typescript-eslint/parser": "^4.0.0",
+        "apollo": "^2.33.1",
         "babel-eslint": "^10.0.0",
         "babel-loader": "^8.2.2",
         "babel-preset-react-app": "^10.0.0",
