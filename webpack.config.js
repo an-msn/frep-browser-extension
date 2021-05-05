@@ -61,6 +61,9 @@ module.exports = {
     ],
     resolve: {
         extensions: ['.js', '.ts', '.tsx'],
+        alias: {
+            '@popup': path.resolve('./src/popup'),
+        },
     },
     devtool: 'inline-cheap-source-map',
 };

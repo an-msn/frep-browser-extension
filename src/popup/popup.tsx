@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TabbedItem, Tabs } from './components/tabs';
 import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
-import ImageFiltering from './routes/imagefiltering';
+import ImageFiltering from './tabs/imagefiltering';
 import theme from './utils/theme';
-import UserManagement from './routes/user';
+import UserManagement from './tabs/user';
+import './utils/firebase';
+import firebase from 'firebase';
 
 const GlobalStyles = createGlobalStyle`
     * {
@@ -23,6 +25,23 @@ const GlobalStyles = createGlobalStyle`
         font-family: 'Rubik', sans-serif;
         font-style: normal;
     }
+
+    .icon {
+        width: 1.4rem;
+        height: 1.4rem;
+    }
+
+    .ml-icon {
+        margin-left: 1rem;
+    }
+
+    .mr-icon {
+        margin-right: 1rem;
+    }
+
+    .mt-md {
+        margin-top: 1rem;
+    }
 `;
 
 const Main = styled.div`
@@ -32,6 +51,16 @@ const Main = styled.div`
 `;
 
 const Popup = () => {
+    useEffect(() => {
+        firebase.auth().onAuthStateChanged((u) => {
+            if (u) {
+                console.log(u?.uid);
+            } else {
+                console.log('Not logged in');
+            }
+        });
+    }, []);
+
     return (
         <div className="App">
             <ThemeProvider theme={theme.dark}>

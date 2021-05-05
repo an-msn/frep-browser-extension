@@ -13,18 +13,25 @@
         "prettier": "prettier --write \"src/**/*.{js,jsx,css,html,ts,tsx}\""
     },
     "dependencies": {
+        "@apollo/client": "^3.3.16",
         "@heroicons/react": "^1.0.1",
         "@hot-loader/react-dom": "^17.0.1",
         "@tensorflow/tfjs": "2.6.0",
         "@types/chrome": "0.0.133",
         "@types/react": "^17.0.2",
         "@types/react-dom": "^17.0.1",
+        "firebase": "^8.4.3",
+        "formik": "^2.2.6",
+        "graphql": "^15.5.0",
         "md5": "^2.3.0",
         "nsfwjs": "^2.3.0",
         "react": "^17.0.1",
         "react-dom": "^17.0.1",
         "react-hot-loader": "^4.13.0",
-        "styled-components": "^5.2.3"
+        "react-router-dom": "^5.2.0",
+        "react-toastify": "^7.0.4",
+        "styled-components": "^5.2.3",
+        "vegemite": "^1.0.0"
     },
     "devDependencies": {
         "@babel/core": "^7.12.17",
@@ -32,6 +39,7 @@
         "@babel/preset-env": "^7.12.17",
         "@babel/preset-react": "^7.12.13",
         "@types/md5": "^2.3.0",
+        "@types/react-router-dom": "^5.1.7",
         "@types/styled-components": "^5.1.9",
         "@typescript-eslint/eslint-plugin": "^4.0.0",
         "@typescript-eslint/parser": "^4.0.0",

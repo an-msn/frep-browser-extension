@@ -3,13 +3,5 @@
     "plugins": ["prettier"],
     "globals": {
         "chrome": "readonly"
-    },
-    "rules": {
-        "prettier/prettier": [
-            "error",
-            {
-                "endOfLine": "auto"
-            }
-        ]
     }
 }

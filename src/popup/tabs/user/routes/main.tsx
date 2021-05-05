@@ -1,4 +1,4 @@
-import { Card } from '../../components/ui';
+import { Card } from '../../../components/ui';
 import React, { useEffect, useState } from 'react';
 import { LogoutIcon, PencilIcon } from '@heroicons/react/outline';
 import styled from 'styled-components';
@@ -67,11 +67,6 @@ const UserDataContainer = styled.div`
     .edit-profile {
         top: auto;
         bottom: 0;
-    }
-
-    .icon {
-        width: 1.4rem;
-        height: 1.4rem;
     }
 `;
 
