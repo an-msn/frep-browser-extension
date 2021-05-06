@@ -8,15 +8,30 @@ export interface User {
 }
 
 interface EventMap {
-    'set:user': User | null;
+    'user:set': User | null;
+    'user:loading': boolean;
 }
 
 interface Store {
+    userLoading: boolean;
     user: User | null;
 }
 
 const store = vegemite<EventMap, Store>({
+    userLoading: true,
     user: null,
+});
+
+store.on('user:set', (state, action) => {
+    console.log(action);
+    if (action) {
+        state.user = action;
+        state.userLoading = false;
+    }
+});
+
+store.on('user:loading', (state, action) => {
+    state.userLoading = action;
 });
 
 export { store };

@@ -12,7 +12,7 @@
         "build": "set NODE_ENV=production && webpack",
         "prettier": "prettier --write \"src/**/*.{js,jsx,css,html,ts,tsx}\"",
         "apollo-dl": "apollo client:download-schema --endpoint=http://localhost:7000/api ./src/popup/graphql-schema.json",
-        "apollo-gen": "apollo client:codegen ./src/popup/ --localSchemaFile=./src/popup/graphql-schema.json --target=typescript --tagName=gql --outputFlat",
+        "apollo-gen": "apollo client:codegen ./src/popup/__generated__/ --localSchemaFile=./src/popup/graphql-schema.json --target=typescript --tagName=gql --outputFlat",
         "codegen": "yarn apollo-dl && yarn apollo-gen"
     },
     "dependencies": {

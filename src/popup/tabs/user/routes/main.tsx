@@ -3,10 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { LogoutIcon, PencilIcon } from '@heroicons/react/outline';
 import styled from 'styled-components';
 import md5 from 'md5';
+import { store, User } from '@popup/utils/appstore';
 
 interface UserBasic {
-    displayName: string;
-    userName: string;
+    name: string;
+    username: string;
     email: string;
     avatar: string | null;
 }
@@ -20,6 +21,9 @@ const UserDataContainer = styled.div`
 
     .data {
         text-align: center;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
 
         .image {
             width: 80px;
@@ -36,6 +40,7 @@ const UserDataContainer = styled.div`
         h2 {
             font-size: 1.7rem;
             font-weight: bold;
+            margin-bottom: 0.5rem;
         }
 
         p {
@@ -71,22 +76,13 @@ const UserDataContainer = styled.div`
 `;
 
 export default function UserManagement() {
+    const user = store.state.user as User;
     const [state, setState] = useState<UserBasic>({
-        displayName: 'Akshay',
-        userName: 'akzhy',
-        email: 'hi@akzhy.com',
-        avatar: null,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        avatar: `https://www.gravatar.com/avatar/${md5(user.email)}?d=retro`,
     });
-
-    const updateState = (v: Partial<UserBasic>) =>
-        setState((p) => ({ ...p, ...v }));
-
-    useEffect(() => {
-        const emailHash = md5(state.email);
-        updateState({
-            avatar: `https://www.gravatar.com/avatar/${emailHash}?d=retro`,
-        });
-    }, [state.email]);
 
     return (
         <div>
@@ -96,8 +92,8 @@ export default function UserManagement() {
                         <div className="image">
                             <img src={state.avatar || ''} alt="Profile Url" />
                         </div>
-                        <h2>{state.displayName}</h2>
-                        <p>@{state.userName}</p>
+                        <h2>{state.name}</h2>
+                        <p>@{state.username}</p>
                     </div>
                     <div className="logout">
                         <p>Logout</p>

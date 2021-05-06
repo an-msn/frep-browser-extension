@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { TabbedItem, Tabs } from './components/tabs';
 import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
+import {
+    ApolloClient,
+    createHttpLink,
+    from,
+    InMemoryCache,
+} from '@apollo/client';
 import { ApolloProvider } from '@apollo/client/react';
 import { setContext } from '@apollo/client/link/context';
 import ImageFiltering from './tabs/imagefiltering';
 import theme from './utils/theme';
-import UserManagement from './tabs/user';
+import UserTab from './tabs/user';
 import './utils/firebase';
 import firebase from 'firebase';
 import InitUser from './utils/inituser';
@@ -54,46 +59,48 @@ const Main = styled.div`
     width: 600px;
 `;
 
+const httpLink = createHttpLink({
+    uri: 'http://localhost:7000/api',
+});
+
 const Popup = () => {
-    const httpLink = createHttpLink({
-        uri: 'http://localhost:7000/api',
-    });
+    const [token, setToken] = useState('');
 
-    const client = new ApolloClient({
-        cache: new InMemoryCache(),
-        link: httpLink,
-    });
-
-    const [hasUser, setHasUser] = useState(false);
+    console.log('Render');
 
     useEffect(() => {
         firebase.auth().onAuthStateChanged((u) => {
             if (u) {
-                u.getIdToken().then((token) => {
-                    const authLink = setContext((_, { headers }) => {
-                        return {
-                            headers: {
-                                ...headers,
-                                authorization: token ? `Bearer ${token}` : '',
-                            },
-                        };
-                    });
-                    client.setLink(authLink.concat(httpLink));
-                    setHasUser(true);
+                u.getIdToken().then((t) => {
+                    console.log('Setting token');
+                    setToken(t);
                 });
             } else {
-                setHasUser(false);
-                client.setLink(httpLink);
+                setToken('');
                 client.clearStore();
             }
         });
         // eslint-disable-next-line
     }, []);
 
+    const authLink = setContext(async (_, { headers }) => {
+        return {
+            headers: {
+                ...headers,
+                authorization: token ? `Bearer ${token}` : '',
+            },
+        };
+    });
+
+    const client = new ApolloClient({
+        cache: new InMemoryCache(),
+        link: from([authLink, httpLink]),
+    });
+
     return (
         <div className="App">
             <ApolloProvider client={client}>
-                {hasUser && <InitUser />}
+                {token && <InitUser />}
                 <ThemeProvider theme={theme.dark}>
                     <GlobalStyles />
                     <Main>
@@ -105,7 +112,7 @@ const Popup = () => {
                                 <h2>Comments</h2>
                             </TabbedItem>
                             <TabbedItem title="User">
-                                <UserManagement />
+                                <UserTab />
                             </TabbedItem>
                         </Tabs>
                     </Main>
