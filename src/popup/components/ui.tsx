@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { ExclamationIcon } from '@heroicons/react/outline';
+import Loader from './loader';
 
 const Card = styled.div`
     width: 100%;
@@ -31,6 +32,11 @@ const FieldContainer = styled.div<{ error?: boolean }>`
             margin-top: 0.6rem;
             border: 1px solid ${(props) => props.theme.textAlt};
             outline: 0;
+        }
+
+        textarea.field {
+            resize: vertical;
+            font-family: 'Rubik', sans-serif;
         }
     }
 
@@ -82,6 +88,32 @@ const TextField = ({
     );
 };
 
+const TextArea = ({
+    label,
+    error,
+    parentClass,
+    ...props
+}: {
+    label: string;
+    error?: string | false;
+    parentClass?: string;
+} & React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
+    return (
+        <FieldContainer error={error ? true : false} className={parentClass}>
+            <label>
+                <p>{label}</p>
+                <textarea {...props} className="field"></textarea>
+            </label>
+            {error && (
+                <div className="error">
+                    <ExclamationIcon />
+                    <p>{error}</p>
+                </div>
+            )}
+        </FieldContainer>
+    );
+};
+
 const ButtonStyle = styled.div<{ disabled?: boolean }>`
     display: inline-block;
 
@@ -117,4 +149,39 @@ const Button = ({
     );
 };
 
-export { Card, TextField, Button };
+const SubmitButton = ({
+    title,
+    titleLoading = 'Loading',
+    loading = false,
+    disabled = false,
+    submitIcon,
+    className,
+}: {
+    disabled?: boolean;
+    loading?: boolean;
+    title: string;
+    submitIcon?: JSX.Element;
+    titleLoading?: string;
+    className?: string;
+}) => {
+    return (
+        <Button className={className} type="submit" disabled={disabled}>
+            {!loading ? (
+                <React.Fragment>
+                    {title}
+                    {submitIcon &&
+                        React.cloneElement(submitIcon, {
+                            className: 'ml-icon icon',
+                        })}
+                </React.Fragment>
+            ) : (
+                <React.Fragment>
+                    {titleLoading}
+                    <Loader className="ml-icon icon" />
+                </React.Fragment>
+            )}
+        </Button>
+    );
+};
+
+export { Card, TextField, TextArea, SubmitButton, Button };

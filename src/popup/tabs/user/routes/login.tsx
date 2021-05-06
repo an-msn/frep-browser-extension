@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useFormik } from 'formik';
-import { Button, Card, TextField } from '@popup/components/ui';
+import { Card, SubmitButton, TextField } from '@popup/components/ui';
 import { LoginIcon } from '@heroicons/react/outline';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import Toast from '@popup/components/toast';
 import { toast } from 'react-toastify';
-import Loader from '@popup/components/loader';
 
 const LoginFormContainer = styled.div`
     display: flex;
@@ -113,25 +112,16 @@ export default function UserLogin() {
                                 formik.errors.password
                             }
                         />
-                        <Button
-                            className="mt-md"
-                            type="submit"
+                        <SubmitButton
+                            title="Login"
+                            titleLoading="Submitting..."
                             disabled={
                                 Object.keys(formik.errors).length > 0 || loading
                             }
-                        >
-                            {!loading ? (
-                                <React.Fragment>
-                                    Login
-                                    <LoginIcon className="ml-icon icon" />
-                                </React.Fragment>
-                            ) : (
-                                <React.Fragment>
-                                    Submitting...
-                                    <Loader className="ml-icon icon" />
-                                </React.Fragment>
-                            )}
-                        </Button>
+                            loading={loading}
+                            className="mt-md"
+                            submitIcon={<LoginIcon />}
+                        />
                     </form>
                 </LoginFormContainer>
             </Card>

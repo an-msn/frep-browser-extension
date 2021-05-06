@@ -1,5 +1,5 @@
 import { Card } from '../../../components/ui';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { LogoutIcon, PencilIcon } from '@heroicons/react/outline';
 import styled from 'styled-components';
 import md5 from 'md5';
@@ -77,7 +77,7 @@ const UserDataContainer = styled.div`
 
 export default function UserManagement() {
     const user = store.state.user as User;
-    const [state, setState] = useState<UserBasic>({
+    const [state] = useState<UserBasic>({
         name: user.name,
         username: user.username,
         email: user.email,

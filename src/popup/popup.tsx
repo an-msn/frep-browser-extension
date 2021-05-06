@@ -15,6 +15,7 @@ import UserTab from './tabs/user';
 import './utils/firebase';
 import firebase from 'firebase';
 import InitUser from './utils/inituser';
+import CommentsPage from './tabs/comments';
 
 const GlobalStyles = createGlobalStyle`
     * {
@@ -50,6 +51,10 @@ const GlobalStyles = createGlobalStyle`
 
     .mt-md {
         margin-top: 1rem;
+    }
+
+    .mb-0 {
+        margin-bottom: 0rem;
     }
 `;
 
@@ -109,7 +114,7 @@ const Popup = () => {
                                 <ImageFiltering />
                             </TabbedItem>
                             <TabbedItem title="Comments">
-                                <h2>Comments</h2>
+                                <CommentsPage />
                             </TabbedItem>
                             <TabbedItem title="User">
                                 <UserTab />
