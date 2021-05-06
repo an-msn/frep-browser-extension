@@ -11,6 +11,7 @@ const USER = gql`
             name
             email
             username
+            avatar
         }
     }
 `;
@@ -24,7 +25,14 @@ export default function InitUser() {
     } else if (error) {
         console.log(error);
     } else if (data) {
-        store.dispatch('user:set', data.user);
+        if (data.user) {
+            store.dispatch('user:set', {
+                ...data.user,
+                email: data.user?.email as string,
+            });
+        } else {
+            store.dispatch('user:set', null);
+        }
     }
 
     return <React.Fragment></React.Fragment>;

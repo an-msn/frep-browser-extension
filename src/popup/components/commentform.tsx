@@ -52,7 +52,6 @@ export default function CommentForm() {
         },
         onSubmit: (values) => {
             setLoading(true);
-            successToast();
             addComment({
                 variables: {
                     comment: values.comment,
@@ -89,6 +88,7 @@ export default function CommentForm() {
 
     return (
         <div>
+            <h2>Post a comment</h2>
             <CommentFormContainer>
                 <form onSubmit={formik.handleSubmit}>
                     <TextArea
