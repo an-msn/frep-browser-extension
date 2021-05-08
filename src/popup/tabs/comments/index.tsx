@@ -2,6 +2,7 @@ import { useLazyQuery } from '@apollo/client';
 import CommentForm from '@popup/components/commentform';
 import CommentItem from '@popup/components/commentitem';
 import { Card } from '@popup/components/ui';
+import { CommentTree } from '@popup/types';
 import { store } from '@popup/utils/appstore';
 import GET_COMMENTS from '@popup/utils/queries/get_comments';
 import { GetCommentsQuery } from '@popup/__generated__/GetCommentsQuery';
@@ -52,13 +53,30 @@ export default function CommentsPage() {
         // eslint-disable-next-line
     }, []);
 
-    const comments = data?.allComments?.map((item) => (
+    const createDataTree = () => {
+        const hashTable = Object.create(null);
+        data?.allComments.forEach(
+            (aData) => (hashTable[aData.id] = { ...aData, childNodes: [] })
+        );
+        const dataTree: any[] = [];
+        data?.allComments.forEach((aData) => {
+            if (aData.parent)
+                hashTable[aData.parent].childNodes.push(hashTable[aData.id]);
+            else dataTree.push(hashTable[aData.id]);
+        });
+        return dataTree as CommentTree[];
+    };
+
+    const commentTree = createDataTree();
+
+    const comments = commentTree.map((item) => (
         <CommentItem
-            avatar={item?.user?.avatar as string}
-            comment={item?.comment as string}
-            name={item?.user?.name as string}
-            username={item?.user?.username as string}
+            comment={item.comment}
+            {...item.user}
+            childNodes={item.childNodes}
+            id={item.id}
             key={item.id}
+            votes={item.votes}
         />
     ));
 

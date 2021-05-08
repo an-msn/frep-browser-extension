@@ -16,6 +16,7 @@ const INSERT_COMMENT = gql`
             comment
             date
             website_url
+            parent
             user {
                 id
                 name

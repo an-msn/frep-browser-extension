@@ -21,10 +21,15 @@ const CommentFormContainer = styled.div`
     }
 `;
 
-export default function CommentForm() {
+export default function CommentForm({
+    isReply = false,
+    parentId,
+}: {
+    isReply?: boolean;
+    parentId?: string;
+}) {
     const [addComment] = useMutation<CreateCommentMutation>(INSERT_COMMENT, {
         update(cache, { data, extensions, context }) {
-            console.log('data', context, data, extensions);
             if (data?.createComment) {
                 const newData = data.createComment;
                 const existingCache = cache.readQuery<GetCommentsQuery>({
@@ -33,8 +38,6 @@ export default function CommentForm() {
                         website_url: newData.website_url,
                     },
                 });
-
-                console.log(existingCache, newData);
 
                 if (existingCache && newData) {
                     cache.writeQuery({
@@ -72,9 +75,13 @@ export default function CommentForm() {
                 variables: {
                     comment: values.comment,
                     website_url: values.website_url,
+                    ...(parentId && {
+                        parent: parentId,
+                    }),
                 },
             })
                 .then((data) => {
+                    formik.resetForm();
                     successToast();
                 })
                 .catch((err) => {
@@ -103,7 +110,7 @@ export default function CommentForm() {
 
     return (
         <div>
-            <h2>Post a comment</h2>
+            <h2>{isReply ? 'Post reply' : 'Post a comment'}</h2>
             <CommentFormContainer>
                 <form onSubmit={formik.handleSubmit}>
                     <TextArea

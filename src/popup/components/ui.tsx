@@ -132,6 +132,10 @@ const ButtonStyle = styled.div<{ disabled?: boolean }>`
         align-items: center;
         cursor: ${(props) => (props.disabled ? 'normal' : 'pointer')};
     }
+
+    &.secondary .button {
+        background-color: ${(props) => props.theme.secondary};
+    }
 `;
 
 const Button = ({

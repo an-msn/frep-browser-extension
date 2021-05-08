@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useFormik } from 'formik';
 import { Card, SubmitButton, TextField } from '@popup/components/ui';
-import { LoginIcon, UserAddIcon } from '@heroicons/react/outline';
+import { UserAddIcon } from '@heroicons/react/outline';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import Toast from '@popup/components/toast';

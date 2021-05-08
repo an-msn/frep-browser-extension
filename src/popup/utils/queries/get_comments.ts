@@ -5,6 +5,13 @@ const GET_COMMENTS = gql`
         allComments(url: $website_url) {
             id
             comment
+            parent
+            date
+            votes {
+                up
+                down
+                own
+            }
             user {
                 id
                 username

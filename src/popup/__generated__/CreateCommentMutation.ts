@@ -21,6 +21,7 @@ export interface CreateCommentMutation_createComment {
   comment: string;
   date: string;
   website_url: string;
+  parent: string | null;
   user: CreateCommentMutation_createComment_user;
 }
 
