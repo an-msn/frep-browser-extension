@@ -16,6 +16,7 @@ import './utils/firebase';
 import firebase from 'firebase';
 import InitUser from './utils/inituser';
 import CommentsPage from './tabs/comments';
+import { store } from './utils/appstore';
 
 const GlobalStyles = createGlobalStyle`
     * {
@@ -71,17 +72,16 @@ const httpLink = createHttpLink({
 const Popup = () => {
     const [token, setToken] = useState('');
 
-    console.log('Render');
-
     useEffect(() => {
         firebase.auth().onAuthStateChanged((u) => {
             if (u) {
                 u.getIdToken().then((t) => {
-                    console.log('Setting token');
                     setToken(t);
                 });
             } else {
                 setToken('');
+                store.dispatch('user:set', null);
+                console.log('Nulling user');
                 client.clearStore();
             }
         });

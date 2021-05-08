@@ -1,7 +1,10 @@
 import { useMutation } from '@apollo/client';
 import { ArrowRightIcon } from '@heroicons/react/outline';
+import GET_COMMENTS from '@popup/utils/queries/get_comments';
+import INSERT_COMMENT from '@popup/utils/queries/insert_comment';
+import { CreateCommentMutation } from '@popup/__generated__/CreateCommentMutation';
+import { GetCommentsQuery } from '@popup/__generated__/GetCommentsQuery';
 import { useFormik } from 'formik';
-import gql from 'graphql-tag';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
@@ -18,25 +21,38 @@ const CommentFormContainer = styled.div`
     }
 `;
 
-const INSERT_COMMENT = gql`
-    #graphql
-    mutation CreateCommentMutation(
-        $comment: String!
-        $website_url: String!
-        $parent: Int
-    ) {
-        createComment(
-            website_url: $website_url
-            comment: $comment
-            parent: $parent
-        ) {
-            id
-        }
-    }
-`;
-
 export default function CommentForm() {
-    const [addComment] = useMutation(INSERT_COMMENT);
+    const [addComment] = useMutation<CreateCommentMutation>(INSERT_COMMENT, {
+        update(cache, { data, extensions, context }) {
+            console.log('data', context, data, extensions);
+            if (data?.createComment) {
+                const newData = data.createComment;
+                const existingCache = cache.readQuery<GetCommentsQuery>({
+                    query: GET_COMMENTS,
+                    variables: {
+                        website_url: newData.website_url,
+                    },
+                });
+
+                console.log(existingCache, newData);
+
+                if (existingCache && newData) {
+                    cache.writeQuery({
+                        query: GET_COMMENTS,
+                        variables: {
+                            website_url: newData.website_url,
+                        },
+                        data: {
+                            allComments: [
+                                ...(existingCache.allComments || []),
+                                newData,
+                            ],
+                        },
+                    });
+                }
+            }
+        },
+    });
     const [loading, setLoading] = useState(false);
 
     const successToast = () =>
@@ -59,7 +75,6 @@ export default function CommentForm() {
                 },
             })
                 .then((data) => {
-                    console.log(data);
                     successToast();
                 })
                 .catch((err) => {

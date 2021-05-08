@@ -7,9 +7,21 @@
 // GraphQL mutation operation: CreateCommentMutation
 // ====================================================
 
+export interface CreateCommentMutation_createComment_user {
+  __typename: "User";
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
+}
+
 export interface CreateCommentMutation_createComment {
-  __typename: "CreateCommentReturn";
-  id: number;
+  __typename: "Comment";
+  id: string;
+  comment: string;
+  date: string;
+  website_url: string;
+  user: CreateCommentMutation_createComment_user;
 }
 
 export interface CreateCommentMutation {
@@ -19,5 +31,5 @@ export interface CreateCommentMutation {
 export interface CreateCommentMutationVariables {
   comment: string;
   website_url: string;
-  parent?: number | null;
+  parent?: string | null;
 }

@@ -7,25 +7,23 @@
 // GraphQL query operation: GetCommentsQuery
 // ====================================================
 
-export interface GetCommentsQuery_comments_user {
+export interface GetCommentsQuery_allComments_user {
   __typename: "User";
-  uid: string;
-  name: string;
-  email: string | null;
+  id: string;
   username: string;
+  name: string;
   avatar: string;
 }
 
-export interface GetCommentsQuery_comments {
-  __typename: "Comments";
-  id: number;
+export interface GetCommentsQuery_allComments {
+  __typename: "Comment";
+  id: string;
   comment: string;
-  url: string;
-  user: GetCommentsQuery_comments_user | null;
+  user: GetCommentsQuery_allComments_user;
 }
 
 export interface GetCommentsQuery {
-  comments: (GetCommentsQuery_comments | null)[] | null;
+  allComments: GetCommentsQuery_allComments[];
 }
 
 export interface GetCommentsQueryVariables {

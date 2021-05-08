@@ -2,8 +2,8 @@ import { Card } from '../../../components/ui';
 import React, { useState } from 'react';
 import { LogoutIcon, PencilIcon } from '@heroicons/react/outline';
 import styled from 'styled-components';
-import md5 from 'md5';
 import { store, User } from '@popup/utils/appstore';
+import firebase from 'firebase';
 
 interface UserBasic {
     name: string;
@@ -59,6 +59,8 @@ const UserDataContainer = styled.div`
         color: ${(props) => props.theme.textAlt};
         align-items: center;
         cursor: pointer;
+        border: 0;
+        background: transparent;
 
         p {
             font-size: 1rem;
@@ -81,8 +83,17 @@ export default function UserManagement() {
         name: user.name,
         username: user.username,
         email: user.email,
-        avatar: `https://www.gravatar.com/avatar/${md5(user.email)}?d=retro`,
+        avatar: user.avatar,
     });
+
+    const handleLogout = () => {
+        firebase
+            .auth()
+            .signOut()
+            .then(() => {
+                console.log('Signing out');
+            });
+    };
 
     return (
         <div>
@@ -95,10 +106,10 @@ export default function UserManagement() {
                         <h2>{state.name}</h2>
                         <p>@{state.username}</p>
                     </div>
-                    <div className="logout">
+                    <button className="logout" onClick={handleLogout}>
                         <p>Logout</p>
                         <LogoutIcon className="icon" />
-                    </div>
+                    </button>
                     <div className="edit-profile">
                         <p>Edit Profile</p>
                         <PencilIcon className="icon" />

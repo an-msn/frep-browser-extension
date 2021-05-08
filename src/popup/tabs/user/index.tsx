@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import UserLogin from './routes/login';
 import UserManagement from './routes/main';
+import UserRegister from './routes/register';
 
 export default function UserTab() {
     const [userState, setUserState] = useState({
@@ -12,6 +13,7 @@ export default function UserTab() {
 
     useEffect(() => {
         store.listen('user:set', (s) => {
+            console.log('user:set', s);
             setUserState({
                 loading: s.userLoading,
                 user: s.user,
@@ -26,13 +28,18 @@ export default function UserTab() {
     return (
         <MemoryRouter>
             {userState.user ? (
-                <Route path="/">
+                <Route path="/" exact>
                     <UserManagement />
                 </Route>
             ) : (
-                <Route path="/">
-                    <UserLogin />
-                </Route>
+                <React.Fragment>
+                    <Route path="/" exact>
+                        <UserLogin />
+                    </Route>
+                    <Route path="/register">
+                        <UserRegister />
+                    </Route>
+                </React.Fragment>
             )}
         </MemoryRouter>
     );

@@ -3,7 +3,7 @@ import vegemite from 'vegemite';
 export interface User {
     name: string;
     email: string;
-    uid: string;
+    id: string;
     username: string;
     avatar: string;
 }
@@ -24,11 +24,8 @@ const store = vegemite<EventMap, Store>({
 });
 
 store.on('user:set', (state, action) => {
-    console.log(action);
-    if (action) {
-        state.user = action;
-        state.userLoading = false;
-    }
+    state.user = action;
+    state.userLoading = false;
 });
 
 store.on('user:loading', (state, action) => {

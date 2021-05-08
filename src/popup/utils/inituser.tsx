@@ -6,8 +6,8 @@ import { UserQuery } from '@popup/__generated__/UserQuery';
 const USER = gql`
     #graphql
     query UserQuery {
-        user {
-            uid
+        User {
+            id
             name
             email
             username
@@ -19,16 +19,16 @@ const USER = gql`
 export default function InitUser() {
     const { loading, error, data } = useQuery<UserQuery>(USER);
 
-    console.log('init user');
     if (loading) {
         store.dispatch('user:loading', true);
     } else if (error) {
         console.log(error);
     } else if (data) {
-        if (data.user) {
+        console.log(data);
+        if (data.User) {
             store.dispatch('user:set', {
-                ...data.user,
-                email: data.user?.email as string,
+                ...data.User,
+                email: data.User?.email as string,
             });
         } else {
             store.dispatch('user:set', null);

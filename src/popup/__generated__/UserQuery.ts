@@ -7,9 +7,9 @@
 // GraphQL query operation: UserQuery
 // ====================================================
 
-export interface UserQuery_user {
+export interface UserQuery_User {
   __typename: "User";
-  uid: string;
+  id: string;
   name: string;
   email: string | null;
   username: string;
@@ -17,5 +17,5 @@ export interface UserQuery_user {
 }
 
 export interface UserQuery {
-  user: UserQuery_user | null;
+  User: UserQuery_User | null;
 }

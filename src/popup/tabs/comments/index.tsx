@@ -3,27 +3,10 @@ import CommentForm from '@popup/components/commentform';
 import CommentItem from '@popup/components/commentitem';
 import { Card } from '@popup/components/ui';
 import { store } from '@popup/utils/appstore';
+import GET_COMMENTS from '@popup/utils/queries/get_comments';
 import { GetCommentsQuery } from '@popup/__generated__/GetCommentsQuery';
-import gql from 'graphql-tag';
 import React, { ReactNode, useEffect, useState } from 'react';
 import styled from 'styled-components';
-
-const GET_COMMENTS = gql`
-    query GetCommentsQuery($website_url: String!) {
-        comments(website_url: $website_url) {
-            id
-            comment
-            url
-            user {
-                uid
-                name
-                email
-                username
-                avatar
-            }
-        }
-    }
-`;
 
 const CommentListDiv = styled.div`
     margin-top: 1rem;
@@ -66,14 +49,16 @@ export default function CommentsPage() {
                 }
             }
         );
+        // eslint-disable-next-line
     }, []);
 
-    const comments = data?.comments?.map((item) => (
+    const comments = data?.allComments?.map((item) => (
         <CommentItem
             avatar={item?.user?.avatar as string}
             comment={item?.comment as string}
             name={item?.user?.name as string}
             username={item?.user?.username as string}
+            key={item.id}
         />
     ));
 
@@ -91,7 +76,7 @@ export default function CommentsPage() {
                 <div>Loading Comments</div>
             ) : (
                 <React.Fragment>
-                    {!data?.comments || data.comments?.length === 0 ? (
+                    {!data?.allComments || data.allComments?.length === 0 ? (
                         <p>No comments</p>
                     ) : (
                         <CommentList>{comments}</CommentList>

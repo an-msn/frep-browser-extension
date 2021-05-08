@@ -7,6 +7,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import Toast from '@popup/components/toast';
 import { toast } from 'react-toastify';
+import { Link } from 'react-router-dom';
 
 const LoginFormContainer = styled.div`
     display: flex;
@@ -17,12 +18,22 @@ const LoginFormContainer = styled.div`
 
     .title {
         width: 100%;
-        padding-top: 1rem;
+        padding: 1rem 0;
 
         h2 {
             text-align: left;
             font-size: 1.4rem;
             margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1rem;
+            color: ${(props) => props.theme.textLight};
+
+            a {
+                color: ${(props) => props.theme.primary};
+                text-decoration: none;
+            }
         }
     }
 
@@ -86,6 +97,9 @@ export default function UserLogin() {
                 <LoginFormContainer>
                     <div className="title">
                         <h2>Login</h2>
+                        <p>
+                            Not a member? <Link to="/register">Register</Link>
+                        </p>
                     </div>
                     <form onSubmit={formik.handleSubmit}>
                         <TextField
