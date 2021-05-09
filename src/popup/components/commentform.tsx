@@ -131,7 +131,6 @@ export default function CommentForm({
                     />
                 </form>
             </CommentFormContainer>
-            <Toast />
         </div>
     );
 }

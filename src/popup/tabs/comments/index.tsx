@@ -72,11 +72,12 @@ export default function CommentsPage() {
     const comments = commentTree.map((item) => (
         <CommentItem
             comment={item.comment}
-            {...item.user}
+            user={item.user}
             childNodes={item.childNodes}
             id={item.id}
             key={item.id}
             votes={item.votes}
+            website_url={item.website_url}
         />
     ));
 

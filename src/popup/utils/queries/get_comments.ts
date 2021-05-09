@@ -12,6 +12,7 @@ const GET_COMMENTS = gql`
                 down
                 own
             }
+            website_url
             user {
                 id
                 username

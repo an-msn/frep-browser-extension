@@ -139,7 +139,6 @@ export default function UserLogin() {
                     </form>
                 </LoginFormContainer>
             </Card>
-            <Toast />
         </div>
     );
 }

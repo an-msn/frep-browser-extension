@@ -196,7 +196,6 @@ export default function UserRegister() {
                     </form>
                 </LoginFormContainer>
             </Card>
-            <Toast />
         </div>
     );
 }

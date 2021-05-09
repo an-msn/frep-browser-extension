@@ -29,6 +29,7 @@ export interface GetCommentsQuery_allComments {
   parent: string | null;
   date: string;
   votes: GetCommentsQuery_allComments_votes;
+  website_url: string;
   user: GetCommentsQuery_allComments_user;
 }
 

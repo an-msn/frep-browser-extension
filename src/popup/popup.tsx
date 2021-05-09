@@ -17,6 +17,7 @@ import firebase from 'firebase';
 import InitUser from './utils/inituser';
 import CommentsPage from './tabs/comments';
 import { store } from './utils/appstore';
+import Toast from './components/toast';
 
 const GlobalStyles = createGlobalStyle`
     * {
@@ -120,6 +121,7 @@ const Popup = () => {
                                 <UserTab />
                             </TabbedItem>
                         </Tabs>
+                        <Toast />
                     </Main>
                 </ThemeProvider>
             </ApolloProvider>
