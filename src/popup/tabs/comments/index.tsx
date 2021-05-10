@@ -1,7 +1,9 @@
 import { useLazyQuery } from '@apollo/client';
+import { CollectionIcon } from '@heroicons/react/outline';
 import CommentForm from '@popup/components/commentform';
 import CommentItem from '@popup/components/commentitem';
-import { Card } from '@popup/components/ui';
+import Loader from '@popup/components/loader';
+import { Button, Card } from '@popup/components/ui';
 import { CommentTree } from '@popup/types';
 import { store } from '@popup/utils/appstore';
 import GET_COMMENTS from '@popup/utils/queries/get_comments';
@@ -9,8 +11,49 @@ import { GetCommentsQuery } from '@popup/__generated__/GetCommentsQuery';
 import React, { ReactNode, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+const MainContainer = styled.div`
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+`;
+
 const CommentListDiv = styled.div`
     margin-top: 1rem;
+`;
+
+const NoComments = styled.div`
+    text-align: center;
+    margin-top: 1rem;
+
+    .icon {
+        display: inline-block;
+
+        svg {
+            width: 2.4rem;
+            height: 2.4rem;
+        }
+    }
+
+    h3 {
+        font-size: 1.2rem;
+        margin-top: 0.6rem;
+    }
+`;
+
+const LoadingComments = styled.div`
+    margin-top: 1rem;
+    text-align: center;
+
+    .icon {
+        display: inline-block;
+    }
+
+    p {
+        font-size: 1rem;
+        margin-top: 0.6rem;
+    }
 `;
 
 const CommentList = ({ children }: { children: ReactNode }) => {
@@ -24,13 +67,14 @@ const CommentList = ({ children }: { children: ReactNode }) => {
 
 export default function CommentsPage() {
     const [user, setUser] = useState(store.state.user);
+    const [commentFormShown, setCommentFormShown] = useState(false);
 
     const [getComments, { loading, data }] = useLazyQuery<GetCommentsQuery>(
         GET_COMMENTS
     );
 
     useEffect(() => {
-        store.listen('user:set', (state) => {
+        const removeListener = store.listen('user:set', (state) => {
             setUser(state.user);
         });
 
@@ -50,6 +94,10 @@ export default function CommentsPage() {
                 }
             }
         );
+
+        return () => {
+            removeListener();
+        };
         // eslint-disable-next-line
     }, []);
 
@@ -82,26 +130,48 @@ export default function CommentsPage() {
     ));
 
     return (
-        <div>
-            <Card>
+        <MainContainer>
+            <Card className="header">
                 <h1>Comments</h1>
+                {user && (
+                    <Button
+                        className="secondary"
+                        onClick={() => setCommentFormShown(!commentFormShown)}
+                    >
+                        Add a comment
+                    </Button>
+                )}
             </Card>
-            {user && (
+            {user && commentFormShown && (
                 <Card className="mt-md">
                     <CommentForm />
                 </Card>
             )}
             {loading ? (
-                <div>Loading Comments</div>
+                <LoadingComments>
+                    <Card>
+                        <div className="icon">
+                            <Loader />
+                        </div>
+                        <p>Loading Comments</p>
+                    </Card>
+                </LoadingComments>
             ) : (
                 <React.Fragment>
                     {!data?.allComments || data.allComments?.length === 0 ? (
-                        <p>No comments</p>
+                        <NoComments>
+                            <Card>
+                                <div className="icon">
+                                    <CollectionIcon />
+                                </div>
+                                <h3>No Comments Yet.</h3>
+                            </Card>
+                        </NoComments>
                     ) : (
                         <CommentList>{comments}</CommentList>
                     )}
                 </React.Fragment>
             )}
-        </div>
+        </MainContainer>
     );
 }

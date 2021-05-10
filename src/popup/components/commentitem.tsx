@@ -52,6 +52,8 @@ const CommentItemContainer = styled.div`
 
     .footer {
         padding: 0.5rem 1rem;
+        width: calc(100% - 2rem);
+        margin: 0 auto;
         border-top: 2px solid ${(props) => props.theme.secondaryLight};
         display: flex;
         justify-content: space-between;

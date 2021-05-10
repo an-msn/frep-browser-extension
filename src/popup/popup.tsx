@@ -58,6 +58,20 @@ const GlobalStyles = createGlobalStyle`
     .mb-0 {
         margin-bottom: 0rem;
     }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+        background: hsl(256, 11%, 5%);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: hsl(256, 11%, 25%);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-corner {
+        background: hsl(255, 100%, 15%);
+    }
 `;
 
 const Main = styled.div`
