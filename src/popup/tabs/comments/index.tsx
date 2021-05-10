@@ -2,6 +2,7 @@ import { useLazyQuery } from '@apollo/client';
 import { CollectionIcon } from '@heroicons/react/outline';
 import CommentForm from '@popup/components/commentform';
 import CommentItem from '@popup/components/commentitem';
+import CommentSortMenu from '@popup/components/commentsortmenu';
 import Loader from '@popup/components/loader';
 import { Button, Card } from '@popup/components/ui';
 import { CommentTree } from '@popup/types';
@@ -15,6 +16,11 @@ const MainContainer = styled.div`
     .header {
         display: flex;
         justify-content: space-between;
+        align-items: center;
+    }
+
+    .right-side {
+        display: flex;
         align-items: center;
     }
 `;
@@ -57,21 +63,17 @@ const LoadingComments = styled.div`
 `;
 
 const CommentList = ({ children }: { children: ReactNode }) => {
-    return (
-        <CommentListDiv>
-            <h2>Comments</h2>
-            {children}
-        </CommentListDiv>
-    );
+    return <CommentListDiv>{children}</CommentListDiv>;
 };
 
 export default function CommentsPage() {
     const [user, setUser] = useState(store.state.user);
     const [commentFormShown, setCommentFormShown] = useState(false);
 
-    const [getComments, { loading, data }] = useLazyQuery<GetCommentsQuery>(
-        GET_COMMENTS
-    );
+    const [
+        getComments,
+        { loading, data, refetch },
+    ] = useLazyQuery<GetCommentsQuery>(GET_COMMENTS);
 
     useEffect(() => {
         const removeListener = store.listen('user:set', (state) => {
@@ -133,14 +135,19 @@ export default function CommentsPage() {
         <MainContainer>
             <Card className="header">
                 <h1>Comments</h1>
-                {user && (
-                    <Button
-                        className="secondary"
-                        onClick={() => setCommentFormShown(!commentFormShown)}
-                    >
-                        Add a comment
-                    </Button>
-                )}
+                <div className="right-side">
+                    {user && (
+                        <Button
+                            className="secondary"
+                            onClick={() =>
+                                setCommentFormShown(!commentFormShown)
+                            }
+                        >
+                            Add a comment
+                        </Button>
+                    )}
+                    <CommentSortMenu />
+                </div>
             </Card>
             {user && commentFormShown && (
                 <Card className="mt-md">

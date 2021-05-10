@@ -19,6 +19,7 @@
         "@apollo/client": "^3.3.16",
         "@heroicons/react": "^1.0.1",
         "@hot-loader/react-dom": "^17.0.1",
+        "@szhsin/react-menu": "^1.10.0",
         "@tensorflow/tfjs": "2.6.0",
         "@types/chrome": "0.0.133",
         "@types/react": "^17.0.2",
