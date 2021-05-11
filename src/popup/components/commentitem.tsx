@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import CommentForm from './commentform';
 import CommentVotes from './commentvotes';
 import { Button } from './ui';
+import { formatDistanceToNow } from 'date-fns';
 
 const CommentItemContainer = styled.div`
     background: ${(props) => props.theme.bgLight};
@@ -30,6 +31,30 @@ const CommentItemContainer = styled.div`
         }
 
         .info {
+            .title {
+                display: flex;
+                align-items: center;
+
+                .date {
+                    padding-left: 0.8rem;
+                    margin-left: 0.8rem;
+                    font-size: 0.9rem;
+                    color: ${(props) => props.theme.textSecondary};
+                    position: relative;
+
+                    &::before {
+                        content: '';
+                        position: absolute;
+                        width: 0.4rem;
+                        height: 0.4rem;
+                        border-radius: 50%;
+                        background: ${(props) => props.theme.secondaryLight};
+                        top: calc(50% - 0.2rem);
+                        left: 0;
+                    }
+                }
+            }
+
             h3 {
                 font-size: 1.1rem;
                 color: ${(props) => props.theme.textLight};
@@ -80,10 +105,12 @@ export default function CommentItem({
     id,
     childNodes,
     votes,
+    date,
 }: {
     comment: string;
     id: string;
     website_url: string;
+    date: string;
     childNodes: CommentTree[];
     user: {
         id: string;
@@ -109,6 +136,7 @@ export default function CommentItem({
             key={item.id}
             childNodes={item.childNodes}
             votes={item.votes}
+            date={item.date}
         />
     ));
 
@@ -122,6 +150,8 @@ export default function CommentItem({
         };
     }, []);
 
+    console.log(date);
+
     return (
         <CommentItemContainer className="comment-item-container">
             <div className="meta">
@@ -129,7 +159,12 @@ export default function CommentItem({
                     <img src={author.avatar} alt="Avatar" />
                 </div>
                 <div className="info">
-                    <h3>{author.name}</h3>
+                    <div className="title">
+                        <h3>{author.name}</h3>
+                        <div className="date">
+                            {formatDistanceToNow(new Date(Number(date)))} ago
+                        </div>
+                    </div>
                     <p>{author.username}</p>
                 </div>
             </div>

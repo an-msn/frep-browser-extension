@@ -22,6 +22,15 @@ const TabbedControlButton = styled.button<{ active: boolean }>`
     font-family: 'Rubik', sans-serif;
     letter-spacing: 1px;
     cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.25s;
+
+    &::hover,
+    &::focus,
+    &::active {
+        background: ${(props) =>
+            props.active ? props.theme.primary : props.theme.bg};
+    }
 `;
 
 export function Tabs({ children }: { children: ReactNode }) {

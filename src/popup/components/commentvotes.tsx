@@ -11,43 +11,46 @@ import {
 } from '@popup/__generated__/CastVoteMutation';
 import { GetCommentsQuery } from '@popup/__generated__/GetCommentsQuery';
 import styled from 'styled-components';
-import Toast from './toast';
 import { toast } from 'react-toastify';
 
 const VoteButtons = styled.div`
     display: flex;
     align-items: center;
 
-    .secondary .button {
-        padding-left: 0.8rem;
-        padding-right: 0.8rem;
-        background-color: transparent;
-        border: 2px solid transparent;
-        transition: 0.35s border;
+    .secondary {
+        .button {
+            padding: 0.6rem;
+            background-color: transparent;
+            border: 2px solid transparent;
+            transition: 0.35s border;
 
-        svg {
-            height: 1rem;
-            width: 1rem;
+            svg {
+                height: 1rem;
+                width: 1rem;
+            }
+
+            &:hover,
+            &:active,
+            &:focus {
+                border: 2px solid ${(props) => props.theme.secondaryLight};
+            }
         }
 
-        &:hover,
-        &:active,
-        &:focus {
-            border: 2px solid ${(props) => props.theme.secondary};
+        &.active .button {
+            color: ${(props) => props.theme.primaryLight};
+            svg path {
+                stroke-width: 4;
+            }
+        }
+
+        &.holding .button {
+            animation: holding 1s infinite;
         }
     }
 
     p {
         font-size: 1rem;
         padding: 0 0.8rem;
-    }
-
-    .active button {
-        color: ${(props) => props.theme.primary};
-    }
-
-    .holding button {
-        animation: holding 1s infinite;
     }
 
     @keyframes holding {

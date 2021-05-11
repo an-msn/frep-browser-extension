@@ -3,6 +3,8 @@
 // @generated
 // This file was automatically generated and should not be edited.
 
+import { AllCommentsSort } from "./globalTypes";
+
 // ====================================================
 // GraphQL query operation: GetCommentsQuery
 // ====================================================
@@ -39,4 +41,5 @@ export interface GetCommentsQuery {
 
 export interface GetCommentsQueryVariables {
   website_url: string;
+  sort?: AllCommentsSort | null;
 }

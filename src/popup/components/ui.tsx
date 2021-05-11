@@ -131,10 +131,24 @@ const ButtonStyle = styled.div<{ disabled?: boolean }>`
         justify-content: center;
         align-items: center;
         cursor: ${(props) => (props.disabled ? 'normal' : 'pointer')};
+        font-family: 'Rubik', sans-serif;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        transition: background-color 0.25s;
+        font-size: 0.9rem;
+
+        &:hover, &:focus, &:active {
+            background-color: ${(props) => props.theme.primaryLight};
+        }
     }
 
     &.secondary .button {
         background-color: ${(props) => props.theme.secondary};
+
+        &:hover {
+            background-color: ${(props) => props.theme.secondaryLight};
+        }
     }
 `;
 

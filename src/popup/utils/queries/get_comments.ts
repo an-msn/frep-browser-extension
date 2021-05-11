@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 const GET_COMMENTS = gql`
-    query GetCommentsQuery($website_url: String!) {
-        allComments(url: $website_url) {
+    query GetCommentsQuery($website_url: String!, $sort: AllCommentsSort) {
+        allComments(url: $website_url, sort: $sort) {
             id
             comment
             parent

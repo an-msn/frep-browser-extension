@@ -8,7 +8,10 @@ import { Button, Card } from '@popup/components/ui';
 import { CommentTree } from '@popup/types';
 import { store } from '@popup/utils/appstore';
 import GET_COMMENTS from '@popup/utils/queries/get_comments';
-import { GetCommentsQuery } from '@popup/__generated__/GetCommentsQuery';
+import {
+    GetCommentsQuery,
+    GetCommentsQueryVariables,
+} from '@popup/__generated__/GetCommentsQuery';
 import React, { ReactNode, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -70,10 +73,10 @@ export default function CommentsPage() {
     const [user, setUser] = useState(store.state.user);
     const [commentFormShown, setCommentFormShown] = useState(false);
 
-    const [
-        getComments,
-        { loading, data, refetch },
-    ] = useLazyQuery<GetCommentsQuery>(GET_COMMENTS);
+    const [getComments, { loading, data, refetch }] = useLazyQuery<
+        GetCommentsQuery,
+        GetCommentsQueryVariables
+    >(GET_COMMENTS);
 
     useEffect(() => {
         const removeListener = store.listen('user:set', (state) => {
@@ -128,6 +131,7 @@ export default function CommentsPage() {
             key={item.id}
             votes={item.votes}
             website_url={item.website_url}
+            date={item.date}
         />
     ));
 
@@ -143,10 +147,12 @@ export default function CommentsPage() {
                                 setCommentFormShown(!commentFormShown)
                             }
                         >
-                            Add a comment
+                            {commentFormShown
+                                ? 'Close comment form'
+                                : 'Add a comment'}
                         </Button>
                     )}
-                    <CommentSortMenu />
+                    <CommentSortMenu refetch={refetch} />
                 </div>
             </Card>
             {user && commentFormShown && (
