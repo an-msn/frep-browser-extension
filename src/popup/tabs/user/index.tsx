@@ -12,13 +12,16 @@ export default function UserTab() {
     });
 
     useEffect(() => {
-        store.listen('user:set', (s) => {
-            console.log('user:set', s);
+        const unsub = store.listen('user:set', (s) => {
             setUserState({
                 loading: s.userLoading,
                 user: s.user,
             });
         });
+
+        return () => {
+            unsub();
+        };
     }, []);
 
     if (userState.loading) {

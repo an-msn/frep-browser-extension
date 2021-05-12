@@ -1,5 +1,5 @@
 import { Card } from '../../../components/ui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LogoutIcon, PencilIcon } from '@heroicons/react/outline';
 import styled from 'styled-components';
 import { store, User } from '@popup/utils/appstore';
@@ -79,12 +79,22 @@ const UserDataContainer = styled.div`
 
 export default function UserManagement() {
     const user = store.state.user as User;
-    const [state] = useState<UserBasic>({
+    const [state, setState] = useState<UserBasic>({
         name: user.name,
         username: user.username,
         email: user.email,
         avatar: user.avatar,
     });
+
+    useEffect(() => {
+        const unsub = store.listen('user:set', (state) => {
+            setState(state.user as User);
+        });
+
+        return () => {
+            unsub();
+        };
+    }, []);
 
     const handleLogout = () => {
         firebase

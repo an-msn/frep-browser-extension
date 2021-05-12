@@ -5,9 +5,14 @@ import { Card, SubmitButton, TextField } from '@popup/components/ui';
 import { UserAddIcon } from '@heroicons/react/outline';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import Toast from '@popup/components/toast';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import {
+    CreateUserMutation,
+    CreateUserMutationVariables,
+} from '@popup/__generated__/CreateUserMutation';
+import CREATE_USER from '@popup/utils/queries/create_user';
 
 const LoginFormContainer = styled.div`
     display: flex;
@@ -44,6 +49,11 @@ const LoginFormContainer = styled.div`
 
 export default function UserRegister() {
     const [loading, setLoading] = useState(false);
+
+    const [registerUser] = useMutation<
+        CreateUserMutation,
+        CreateUserMutationVariables
+    >(CREATE_USER);
 
     const formik = useFormik({
         initialValues: {
@@ -85,31 +95,27 @@ export default function UserRegister() {
         onSubmit: (data) => {
             setLoading(true);
 
-            firebase
-                .auth()
-                .signInWithEmailAndPassword(data.email, data.password)
-                .then(() => {
-                    successToast();
-                })
-                .catch((err) => {
-                    if (
-                        err.code === 'auth/wrong-password' ||
-                        err.code === 'auth/user-not-found'
-                    ) {
-                        errorToast('Incorrect email or password');
+            registerUser({
+                variables: data,
+            })
+                .then((res) => {
+                    if (res.errors) {
+                        toast.error('An error occurred while registering');
                     } else {
-                        errorToast();
+                        firebase
+                            .auth()
+                            .signInWithCustomToken(
+                                res.data?.createUser.token as string
+                            );
+                        toast.success('Registering succesful');
                     }
                 })
-                .finally(() => {
-                    setLoading(false);
+                .catch((err) => {
+                    console.log(err);
+                    toast.error('An error occurred while registering');
                 });
         },
     });
-
-    const successToast = () =>
-        toast.success('Login successfull, please wait..');
-    const errorToast = (msg = 'Unable to login') => toast.error(msg);
 
     return (
         <div>

@@ -19,12 +19,18 @@ const CommentSortMenuContainer = styled.div`
 
     .menu-button {
         display: inline-flex;
-        background-color: ${(props) => props.theme.secondaryLight};
+        background-color: ${(props) => props.theme.secondary};
         border: 0;
         color: ${(props) => props.theme.text};
         padding: 0.6rem 0.5rem;
         border-radius: 4px;
         cursor: pointer;
+
+        &:hover,
+        &:active,
+        &:focus {
+            background-color: ${(props) => props.theme.secondaryLight};
+        }
     }
 
     ul {

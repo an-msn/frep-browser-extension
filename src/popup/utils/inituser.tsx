@@ -1,23 +1,13 @@
 import React from 'react';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import { store } from './appstore';
 import { UserQuery } from '@popup/__generated__/UserQuery';
-
-const USER = gql`
-    #graphql
-    query UserQuery {
-        User {
-            id
-            name
-            email
-            username
-            avatar
-        }
-    }
-`;
+import CURRENT_USER from './queries/current_user';
 
 export default function InitUser() {
-    const { loading, error, data } = useQuery<UserQuery>(USER);
+    const { loading, error, data } = useQuery<UserQuery>(CURRENT_USER, {
+        fetchPolicy: 'no-cache',
+    });
 
     if (loading) {
         store.dispatch('user:loading', true);
