@@ -6,6 +6,7 @@ import CommentForm from './commentform';
 import CommentVotes from './commentvotes';
 import { Button } from './ui';
 import { formatDistanceToNow } from 'date-fns';
+import CommentReport from './commentreport';
 
 const CommentItemContainer = styled.div`
     background: ${(props) => props.theme.bgLight};
@@ -83,6 +84,10 @@ const CommentItemContainer = styled.div`
         display: flex;
         justify-content: space-between;
         align-items: center;
+
+        .actions {
+            display: flex;
+        }
     }
 
     .reply {
@@ -179,6 +184,7 @@ export default function CommentItem({
                     votes={votes}
                 />
                 <div className="actions">
+                    <CommentReport />
                     <Button
                         className="secondary"
                         onClick={() => setReplyOpen(!replyOpen)}

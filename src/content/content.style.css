@@ -1,4 +1,4 @@
-/* body:not([data-frep-disabled]) img {
+body:not([data-frep-disabled]) img {
     filter: blur(2em) !important;
 }
 
@@ -16,4 +16,4 @@ body:not([data-frep-disabled]) img[data-frep-blurvalue='extra-light'] {
 
 body:not([data-frep-disabled]) img[data-frep-blurvalue='unblur'] {
     filter: blur(0px) !important;
-} */
+}

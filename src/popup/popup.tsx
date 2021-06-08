@@ -41,6 +41,11 @@ const GlobalStyles = createGlobalStyle`
     .icon {
         width: 1.4rem;
         height: 1.4rem;
+
+        &--small {
+            width: 1rem;
+            height: 1rem;
+        }
     }
 
     .ml-icon {

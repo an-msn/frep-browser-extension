@@ -138,7 +138,9 @@ const ButtonStyle = styled.div<{ disabled?: boolean }>`
         transition: background-color 0.25s;
         font-size: 0.9rem;
 
-        &:hover, &:focus, &:active {
+        &:hover,
+        &:focus,
+        &:active {
             background-color: ${(props) => props.theme.primaryLight};
         }
     }
@@ -202,4 +204,54 @@ const SubmitButton = ({
     );
 };
 
-export { Card, TextField, TextArea, SubmitButton, Button };
+const RadioButtonContainer = styled.label<{ active: boolean }>`
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+    position: relative;
+
+    .radio {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid
+            ${(props) =>
+                props.active ? props.theme.primary : props.theme.bgTrack};
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: ${(props) => props.theme.primary};
+            border-radius: 50%;
+            transform: scale(0.75);
+            transform-origin: 50% 50%;
+            display: ${(props) => (props.active ? 'block' : 'none')};
+        }
+    }
+
+    input {
+        position: absolute;
+        opacity: 0;
+    }
+`;
+
+const RadioButton = ({
+    name,
+    active = false,
+    ...props
+}: {
+    name: string;
+    active?: boolean;
+} & React.InputHTMLAttributes<HTMLInputElement>) => {
+    return (
+        <RadioButtonContainer active={active}>
+            <div className="radio"></div>
+            <input type="radio" name={name} {...props} />
+        </RadioButtonContainer>
+    );
+};
+
+export { Card, TextField, TextArea, SubmitButton, Button, RadioButton };
