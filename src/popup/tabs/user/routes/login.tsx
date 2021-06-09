@@ -5,7 +5,6 @@ import { Card, SubmitButton, TextField } from '@popup/components/ui';
 import { LoginIcon } from '@heroicons/react/outline';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import Toast from '@popup/components/toast';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 

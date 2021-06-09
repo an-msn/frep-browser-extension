@@ -4,6 +4,7 @@ import { LogoutIcon, PencilIcon } from '@heroicons/react/outline';
 import styled from 'styled-components';
 import { store, User } from '@popup/utils/appstore';
 import firebase from 'firebase';
+import { Link } from 'react-router-dom';
 
 interface UserBasic {
     name: string;
@@ -61,6 +62,7 @@ const UserDataContainer = styled.div`
         cursor: pointer;
         border: 0;
         background: transparent;
+        text-decoration: none;
 
         p {
             font-size: 1rem;
@@ -88,7 +90,7 @@ export default function UserManagement() {
 
     useEffect(() => {
         const unsub = store.listen('user:set', (state) => {
-            setState(state.user as User);
+            if (state.user) setState(state.user);
         });
 
         return () => {
@@ -120,10 +122,10 @@ export default function UserManagement() {
                         <p>Logout</p>
                         <LogoutIcon className="icon" />
                     </button>
-                    <div className="edit-profile">
+                    <Link to="/edit" className="edit-profile">
                         <p>Edit Profile</p>
                         <PencilIcon className="icon" />
-                    </div>
+                    </Link>
                 </UserDataContainer>
             </Card>
         </div>

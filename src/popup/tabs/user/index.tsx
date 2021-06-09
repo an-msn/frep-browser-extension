@@ -1,6 +1,7 @@
 import { store } from '@popup/utils/appstore';
 import React, { useEffect, useState } from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
+import EditProfile from './routes/edit';
 import UserLogin from './routes/login';
 import UserManagement from './routes/main';
 import UserRegister from './routes/register';
@@ -31,9 +32,14 @@ export default function UserTab() {
     return (
         <MemoryRouter>
             {userState.user ? (
-                <Route path="/" exact>
-                    <UserManagement />
-                </Route>
+                <React.Fragment>
+                    <Route path="/" exact>
+                        <UserManagement />
+                    </Route>
+                    <Route path="/edit">
+                        <EditProfile />
+                    </Route>
+                </React.Fragment>
             ) : (
                 <React.Fragment>
                     <Route path="/" exact>

@@ -7,6 +7,7 @@ import CommentVotes from './commentvotes';
 import { Button } from './ui';
 import { formatDistanceToNow } from 'date-fns';
 import CommentReport from './commentreport';
+import CommentDelete from './commentdelete';
 
 const CommentItemContainer = styled.div`
     background: ${(props) => props.theme.bgLight};
@@ -74,6 +75,11 @@ const CommentItemContainer = styled.div`
         padding: 0 1.4rem 1rem 1.4rem;
         border-radius: 4px;
         font-size: 1rem;
+
+        &.deleted {
+            font-style: italic;
+            opacity: 0.6;
+        }
     }
 
     .footer {
@@ -111,11 +117,13 @@ export default function CommentItem({
     childNodes,
     votes,
     date,
+    commentDeleted,
 }: {
     comment: string;
     id: string;
     website_url: string;
     date: string;
+    commentDeleted: boolean;
     childNodes: CommentTree[];
     user: {
         id: string;
@@ -142,6 +150,7 @@ export default function CommentItem({
             childNodes={item.childNodes}
             votes={item.votes}
             date={item.date}
+            commentDeleted={item.deleted}
         />
     ));
 
@@ -154,8 +163,6 @@ export default function CommentItem({
             removeListener();
         };
     }, []);
-
-    console.log(date);
 
     return (
         <CommentItemContainer className="comment-item-container">
@@ -173,7 +180,9 @@ export default function CommentItem({
                     <p>{author.username}</p>
                 </div>
             </div>
-            <div className="comment">{comment}</div>
+            <div className={`comment ${commentDeleted ? 'deleted' : ''}`}>
+                {comment}
+            </div>
             <div className="footer">
                 <CommentVotes
                     commentData={{
@@ -182,9 +191,20 @@ export default function CommentItem({
                     }}
                     user={user}
                     votes={votes}
+                    votesDisabled={
+                        user === null || user.id === author.id || commentDeleted
+                    }
                 />
                 <div className="actions">
-                    <CommentReport />
+                    {user && user?.id !== author.id && !commentDeleted && (
+                        <CommentReport commentId={id} />
+                    )}
+                    {user && user.id === author.id && !commentDeleted && (
+                        <CommentDelete
+                            commentId={id}
+                            website_url={website_url}
+                        />
+                    )}
                     <Button
                         className="secondary"
                         onClick={() => setReplyOpen(!replyOpen)}

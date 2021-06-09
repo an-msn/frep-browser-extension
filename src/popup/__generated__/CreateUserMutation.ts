@@ -13,7 +13,7 @@ export interface CreateUserMutation_createUser {
 }
 
 export interface CreateUserMutation {
-  createUser: CreateUserMutation_createUser;
+  createUser: CreateUserMutation_createUser | null;
 }
 
 export interface CreateUserMutationVariables {

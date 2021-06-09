@@ -13,6 +13,7 @@ const GET_COMMENTS = gql`
                 own
             }
             website_url
+            deleted
             user {
                 id
                 username

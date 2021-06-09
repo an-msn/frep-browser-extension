@@ -132,6 +132,7 @@ export default function CommentsPage() {
             votes={item.votes}
             website_url={item.website_url}
             date={item.date}
+            commentDeleted={item.deleted}
         />
     ));
 

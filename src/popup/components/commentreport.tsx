@@ -1,5 +1,12 @@
+import { useMutation } from '@apollo/client';
 import { FlagIcon, XIcon } from '@heroicons/react/outline';
-import React, { useState } from 'react';
+import REPORT_COMMENT from '@popup/utils/queries/report_comment';
+import {
+    ReportCommentMutation,
+    ReportCommentMutationVariables,
+} from '@popup/__generated__/ReportCommentMutation';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import styled from 'styled-components';
 import { Button, RadioButton, SubmitButton, TextArea } from './ui';
 
@@ -58,16 +65,7 @@ const CommentReportContainer = styled.div`
                         list-style: none;
 
                         li {
-                            display: flex;
-                            align-items: center;
-                            flex-wrap: wrap;
                             margin: 0.8rem 0;
-
-                            p {
-                                display: inline-block;
-                                font-size: 1rem;
-                                margin-left: 0.5rem;
-                            }
                         }
 
                         .custom-message {
@@ -77,6 +75,16 @@ const CommentReportContainer = styled.div`
                     }
                     .report-comment-button {
                         margin-top: 2rem;
+
+                        .error {
+                            margin-top: -1rem;
+                            margin-bottom: 1rem;
+                            font-size: 1rem;
+                            border-radius: 4px;
+                            padding: 0.5rem;
+                            background: ${(props) => props.theme.errorLight};
+                            color: ${(props) => props.theme.errorDark};
+                        }
                     }
                 }
             }
@@ -84,17 +92,69 @@ const CommentReportContainer = styled.div`
     }
 `;
 
-export default function CommentReport() {
-    const [reportBoxOpen, setReportBoxOpen] = useState(false);
-
+export default function CommentReport({ commentId }: { commentId: string }) {
     const reportMessages = [
         'This comment is spam',
         'This comment is offensive or inappropriate',
-        'This comment is fake',
+        'This comment contains fake information',
         'Other, specify',
     ];
 
+    const [reportComment] = useMutation<
+        ReportCommentMutation,
+        ReportCommentMutationVariables
+    >(REPORT_COMMENT);
+    const [reportBoxOpen, setReportBoxOpen] = useState(false);
     const [activeReportMessage, setActiveReportMessage] = useState(0);
+    const [specifiedErrorMessage, setSpecifiedErrorMessage] = useState('');
+    const [error, setError] = useState<'message-short' | 'network' | false>(
+        false
+    );
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (error === 'message-short' && specifiedErrorMessage) {
+            if (specifiedErrorMessage.trim().length >= 10) {
+                setError(false);
+            }
+        }
+    }, [error, specifiedErrorMessage]);
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setSubmitting(true);
+
+        let message = reportMessages[activeReportMessage];
+
+        if (activeReportMessage === reportMessages.length - 1) {
+            if (specifiedErrorMessage.trim().length < 10) {
+                setError('message-short');
+                setSubmitting(false);
+                return;
+            }
+            message = specifiedErrorMessage;
+        }
+
+        reportComment({
+            variables: {
+                comment: commentId,
+                message: message,
+            },
+        })
+            .then((res) => {
+                if (res) {
+                    toast.success('Comment reported');
+                } else {
+                    toast.error('An error occured while reporting');
+                }
+            })
+            .catch(() => {
+                toast.error('An error occured while reporting');
+            })
+            .finally(() => {
+                setSubmitting(false);
+            });
+    };
 
     return (
         <CommentReportContainer>
@@ -131,32 +191,89 @@ export default function CommentReport() {
                                 </div>
                             </div>
                             <div className="content">
-                                <ul className="report-messages">
-                                    {reportMessages.map((msg, i) => (
-                                        <li key={`report-comment-message-${i}`}>
-                                            <RadioButton
-                                                name="report-option"
-                                                aria-label={msg}
-                                                active={
-                                                    i === activeReportMessage
-                                                }
-                                                onChange={() => {
-                                                    setActiveReportMessage(i);
-                                                }}
-                                            />
-                                            <p>{msg}</p>
-                                            {i === reportMessages.length - 1 &&
-                                                i === activeReportMessage && (
-                                                    <div className="custom-message">
-                                                        <TextArea label="Message" />
-                                                    </div>
-                                                )}
-                                        </li>
-                                    ))}
-                                </ul>
-                                <div className="report-comment-button">
-                                    <SubmitButton title="Report"></SubmitButton>
-                                </div>
+                                <form onSubmit={handleSubmit}>
+                                    <ul className="report-messages">
+                                        {reportMessages.map((msg, i) => (
+                                            <li
+                                                key={`report-comment-message-${i}`}
+                                            >
+                                                <RadioButton
+                                                    name="report-option"
+                                                    aria-label={msg}
+                                                    label={msg}
+                                                    active={
+                                                        i ===
+                                                        activeReportMessage
+                                                    }
+                                                    onChange={() => {
+                                                        setActiveReportMessage(
+                                                            i
+                                                        );
+                                                    }}
+                                                />
+                                                {i ===
+                                                    reportMessages.length - 1 &&
+                                                    i ===
+                                                        activeReportMessage && (
+                                                        <div className="custom-message">
+                                                            <TextArea
+                                                                label="Message"
+                                                                value={
+                                                                    specifiedErrorMessage
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setSpecifiedErrorMessage(
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                            />
+                                                        </div>
+                                                    )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <div className="report-comment-button">
+                                        {error && (
+                                            <React.Fragment>
+                                                {(() => {
+                                                    if (
+                                                        activeReportMessage ===
+                                                            reportMessages.length -
+                                                                1 &&
+                                                        error ===
+                                                            'message-short'
+                                                    ) {
+                                                        return (
+                                                            <p className="error">
+                                                                Enter a message
+                                                                with atleast 10
+                                                                characters
+                                                            </p>
+                                                        );
+                                                    }
+
+                                                    if (error === 'network') {
+                                                        return (
+                                                            <p className="error">
+                                                                An unexpected
+                                                                error occured
+                                                            </p>
+                                                        );
+                                                    }
+
+                                                    return null;
+                                                })()}
+                                            </React.Fragment>
+                                        )}
+                                        <SubmitButton
+                                            disabled={submitting}
+                                            titleLoading="Reporting..."
+                                            loading={submitting}
+                                            title="Report"
+                                        ></SubmitButton>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>

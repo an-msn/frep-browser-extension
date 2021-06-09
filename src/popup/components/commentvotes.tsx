@@ -29,10 +29,21 @@ const VoteButtons = styled.div`
                 width: 1rem;
             }
 
+            &[disabled] {
+                svg {
+                    opacity: 0.5;
+                }
+            }
+
             &:hover,
             &:active,
             &:focus {
                 border: 2px solid ${(props) => props.theme.secondaryLight};
+
+                &[disabled] {
+                    border: 2px solid transparent;
+                    background: transparent;
+                }
             }
         }
 
@@ -68,6 +79,7 @@ export default function CommentVotes({
     user,
     commentData,
     votes,
+    votesDisabled,
 }: {
     user: User | null;
     commentData: {
@@ -79,6 +91,7 @@ export default function CommentVotes({
         down: number;
         own: number | null;
     };
+    votesDisabled?: boolean;
 }) {
     const [voteState, setVoteState] = useState<
         'neutral' | 'upvoting' | 'downvoting'
@@ -165,7 +178,7 @@ export default function CommentVotes({
                 className={`secondary upvote ${votes.own === 1 && 'active'} ${
                     voteState === 'upvoting' && 'holding'
                 }`}
-                disabled={user === null || voteState !== 'neutral'}
+                disabled={votesDisabled || voteState !== 'neutral'}
                 onClick={() => handleVote('up')}
             >
                 <ArrowUpIcon />
@@ -175,7 +188,7 @@ export default function CommentVotes({
                 className={`secondary downvote ${
                     votes.own === -1 && 'active'
                 } ${voteState === 'downvoting' && 'holding'}`}
-                disabled={user === null || voteState !== 'neutral'}
+                disabled={votesDisabled || voteState !== 'neutral'}
                 onClick={() => handleVote('down')}
             >
                 <ArrowDownIcon />

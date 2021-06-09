@@ -205,14 +205,16 @@ const SubmitButton = ({
 };
 
 const RadioButtonContainer = styled.label<{ active: boolean }>`
-    width: 1rem;
-    height: 1rem;
-    display: inline-block;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
     position: relative;
 
     .radio {
-        width: 100%;
-        height: 100%;
+        width: 1rem;
+        height: 1rem;
+
         border-radius: 50%;
         border: 2px solid
             ${(props) =>
@@ -236,20 +238,29 @@ const RadioButtonContainer = styled.label<{ active: boolean }>`
         position: absolute;
         opacity: 0;
     }
+
+    p {
+        display: inline-block;
+        font-size: 1rem;
+        margin-left: 0.5rem;
+    }
 `;
 
 const RadioButton = ({
     name,
     active = false,
+    label,
     ...props
 }: {
     name: string;
+    label: string;
     active?: boolean;
 } & React.InputHTMLAttributes<HTMLInputElement>) => {
     return (
         <RadioButtonContainer active={active}>
-            <div className="radio"></div>
             <input type="radio" name={name} {...props} />
+            <div className="radio"></div>
+            <p>{label}</p>
         </RadioButtonContainer>
     );
 };

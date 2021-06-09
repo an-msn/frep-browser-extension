@@ -105,7 +105,7 @@ export default function UserRegister() {
                         firebase
                             .auth()
                             .signInWithCustomToken(
-                                res.data?.createUser.token as string
+                                res.data?.createUser?.token as string
                             );
                         toast.success('Registering succesful');
                     }

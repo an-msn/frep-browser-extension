@@ -32,6 +32,7 @@ export interface GetCommentsQuery_allComments {
   date: string;
   votes: GetCommentsQuery_allComments_votes;
   website_url: string;
+  deleted: boolean;
   user: GetCommentsQuery_allComments_user;
 }
 
