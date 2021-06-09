@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TabbedItem, Tabs } from './components/tabs';
-import styled, { createGlobalStyle, ThemeProvider } from 'styled-components';
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import {
     ApolloClient,
     createHttpLink,
@@ -9,15 +8,11 @@ import {
 } from '@apollo/client';
 import { ApolloProvider } from '@apollo/client/react';
 import { setContext } from '@apollo/client/link/context';
-import ImageFiltering from './tabs/imagefiltering';
 import theme from './utils/theme';
-import UserTab from './tabs/user';
 import './utils/firebase';
 import firebase from 'firebase';
-import InitUser from './utils/inituser';
-import CommentsPage from './tabs/comments';
 import { store } from './utils/appstore';
-import Toast from './components/toast';
+import Main from './main';
 
 const GlobalStyles = createGlobalStyle`
     * {
@@ -79,12 +74,6 @@ const GlobalStyles = createGlobalStyle`
     }
 `;
 
-const Main = styled.div`
-    background: ${(props) => props.theme.bg};
-    color: ${(props) => props.theme.text};
-    width: 600px;
-`;
-
 const httpLink = createHttpLink({
     uri: 'http://localhost:7000/api',
 });
@@ -125,23 +114,9 @@ const Popup = () => {
     return (
         <div className="App">
             <ApolloProvider client={client}>
-                {token && <InitUser />}
                 <ThemeProvider theme={theme.dark}>
                     <GlobalStyles />
-                    <Main>
-                        <Tabs>
-                            <TabbedItem title="Image Filtering">
-                                <ImageFiltering />
-                            </TabbedItem>
-                            <TabbedItem title="Comments">
-                                <CommentsPage />
-                            </TabbedItem>
-                            <TabbedItem title="User">
-                                <UserTab />
-                            </TabbedItem>
-                        </Tabs>
-                        <Toast />
-                    </Main>
+                    <Main token={token} />
                 </ThemeProvider>
             </ApolloProvider>
         </div>

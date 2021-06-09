@@ -9,6 +9,7 @@ const CURRENT_USER = gql`
             email
             username
             avatar
+            isAdmin
         }
     }
 `;

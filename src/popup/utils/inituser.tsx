@@ -14,11 +14,12 @@ export default function InitUser() {
     } else if (error) {
         console.log(error);
     } else if (data) {
-        console.log(data);
+        console.log('here');
         if (data.User) {
             store.dispatch('user:set', {
                 ...data.User,
                 email: data.User?.email as string,
+                isAdmin: data.User.isAdmin === true,
             });
         } else {
             store.dispatch('user:set', null);

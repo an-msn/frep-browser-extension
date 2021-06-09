@@ -39,7 +39,7 @@ export function Tabs({ children }: { children: ReactNode }) {
     const tabbedControls: string[] = [];
     React.Children.forEach(children, (_child) => {
         const child = _child as ReactPortal;
-        tabbedControls.push(child.props.title);
+        if (child) tabbedControls.push(child?.props?.title);
     });
     const tabbedControlElements = tabbedControls.map((item, i) => (
         <TabbedControl

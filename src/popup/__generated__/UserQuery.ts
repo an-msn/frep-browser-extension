@@ -14,6 +14,7 @@ export interface UserQuery_User {
   email: string | null;
   username: string;
   avatar: string;
+  isAdmin: boolean | null;
 }
 
 export interface UserQuery {
