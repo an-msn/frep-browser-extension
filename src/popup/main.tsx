@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { TabbedItem, Tabs } from './components/tabs';
 import Toast from './components/toast';
+import AdminTab from './tabs/admin';
 import CommentsPage from './tabs/comments';
 import ImageFiltering from './tabs/imagefiltering';
 import UserTab from './tabs/user';
@@ -57,7 +58,7 @@ export default function Main({ token }: { token: string }) {
                 </TabbedItem>
                 {data?.User?.isAdmin && (
                     <TabbedItem title="Admin">
-                        <UserTab />
+                        <AdminTab />
                     </TabbedItem>
                 )}
             </Tabs>
