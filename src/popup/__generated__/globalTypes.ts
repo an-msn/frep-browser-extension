@@ -12,6 +12,11 @@ export enum AllCommentsSortBy {
   score = "score",
 }
 
+export enum ReportActions {
+  DISCARD = "DISCARD",
+  REMOVE_COMMENT = "REMOVE_COMMENT",
+}
+
 export enum SortOrder {
   asc = "asc",
   desc = "desc",

@@ -3,6 +3,7 @@ import { gql } from '@apollo/client';
 const GET_ALL_REPORTS = gql`
     query GetAllReports {
         allReports {
+            id
             comment {
                 comment
                 user {

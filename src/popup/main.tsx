@@ -27,6 +27,7 @@ export default function Main({ token }: { token: string }) {
 
     useEffect(() => {
         if (token.length > 1) {
+            console.log('Token', token);
             store.dispatch('user:loading', true);
             getCurrentUser();
         }

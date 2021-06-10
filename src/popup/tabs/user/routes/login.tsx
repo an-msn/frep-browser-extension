@@ -36,6 +36,17 @@ const LoginFormContainer = styled.div`
         }
     }
 
+    .forgot-password {
+        margin: 0.8rem 0;
+
+        a {
+            outline: 0;
+            cursor: pointer;
+            color: ${(props) => props.theme.text};
+            text-decoration: none;
+        }
+    }
+
     form {
         width: 100%;
     }
@@ -90,6 +101,25 @@ export default function UserLogin() {
         toast.success('Login successfull, please wait..');
     const errorToast = (msg = 'Unable to login') => toast.error(msg);
 
+    const handleForgotPassword = () => {
+        const email = window.prompt('Enter your email address');
+
+        if (email) {
+            firebase
+                .auth()
+                .sendPasswordResetEmail(email)
+                .then(() => {
+                    toast.success(
+                        'A password reset email has been sent to you'
+                    );
+                })
+                .catch((err) => {
+                    console.log(err);
+                    toast.error('Error sending reset password email');
+                });
+        }
+    };
+
     return (
         <div>
             <Card>
@@ -125,6 +155,11 @@ export default function UserLogin() {
                                 formik.errors.password
                             }
                         />
+                        <div className="forgot-password">
+                            <a href="#forgot" onClick={handleForgotPassword}>
+                                Forgot Password?
+                            </a>
+                        </div>
                         <SubmitButton
                             title="Login"
                             titleLoading="Submitting..."

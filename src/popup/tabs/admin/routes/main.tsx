@@ -28,7 +28,7 @@ export default function AdminMain() {
     return (
         <Card>
             <AdminMainContainer>
-                <div className="item">
+                {/* <div className="item">
                     <Button
                         className="secondary"
                         onClick={() => router.push('/users')}
@@ -36,7 +36,7 @@ export default function AdminMain() {
                         Users
                         <UsersIcon className="icon icon--small" />
                     </Button>
-                </div>
+                </div> */}
                 <div className="item">
                     <Button
                         className="secondary"

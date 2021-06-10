@@ -29,6 +29,7 @@ export interface GetAllReports_allReports_user {
 
 export interface GetAllReports_allReports {
   __typename: "CommentReport";
+  id: string;
   comment: GetAllReports_allReports_comment;
   user: GetAllReports_allReports_user;
   message: string;
